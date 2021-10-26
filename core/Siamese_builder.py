@@ -48,5 +48,4 @@ if __name__ == '__main__':
     print('*' * 30)
     base_encoder = nn.Linear(100, 300)
     pretrained_encoder = SimSiam(base_encoder, 300)
-
     print(pretrained_encoder)
