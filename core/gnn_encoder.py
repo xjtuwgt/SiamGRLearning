@@ -82,7 +82,6 @@ class RGDTLayer(nn.Module):
                 self.res_fc_ent = Identity()
         else:
             self.register_buffer('res_fc_ent', None)
-
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         self.graph_layer_norm = layer_norm(in_ent_feats)
         self.ff_layer_norm = layer_norm(self._num_heads * self._head_dim)
@@ -229,7 +228,6 @@ class GDTLayer(nn.Module):
                 self.res_fc_ent = Identity()
         else:
             self.register_buffer('res_fc_ent', None)
-
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         self.graph_layer_norm = layer_norm(in_ent_feats)
         self.ff_layer_norm = layer_norm(self._num_heads * self._head_dim)
