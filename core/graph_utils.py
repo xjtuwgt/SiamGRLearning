@@ -7,6 +7,26 @@ from copy import deepcopy
 import dgl.backend as F
 import numpy as np
 import scipy as sp
+def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
+    special_entity_dict = {}
+    special_relation_dict = {}
+    number_nodes = n_entities
+    assert number_nodes == graph.number_of_nodes()
+    special_entity_dict['cls'] = number_nodes ## for graph-level representation learning
+    special_entity_dict['mask'] = number_nodes + 1 ## for node mask
+    graph.add_nodes(2) ### add such 'cls' token as a new mask entity++++ adding two more nodes
+    for hop in range(hop_num):
+        special_relation_dict['in_hop_{}'.format(hop + 1)] = n_relations + (2 * hop)
+        special_relation_dict['out_hop_{}'.format(hop + 1)] = n_relations + (2 * hop + 1)
+    n_relations = n_relations + 2 * hop_num
+    special_relation_dict['cls_r'] = n_relations ## connect each node to cls token;
+    n_relations = n_relations + 1
+    special_relation_dict['loop_r'] = n_relations ## self-loop relation
+    n_relations = n_entities + 1
+    special_relation_dict['mask_r'] = n_relations ### for edge mask
+    number_of_nodes = graph.number_of_nodes()
+    number_of_relations = n_relations
+    return graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
 
 def directed_sub_graph(anchor_node_ids: LongTensor, cls_node_ids: LongTensor, fanouts: list, graph, edge_dir: str = 'in'):
     """
@@ -37,10 +57,8 @@ def directed_sub_graph(anchor_node_ids: LongTensor, cls_node_ids: LongTensor, fa
             edge_dict[eid] = (src_id, tid, dst_id)
         if edge_dir == 'in':
             hop_neighbor = sg_src
-        elif edge_dir == 'out':
-            hop_neighbor = sg_dst
         else:
-            raise 'Edge direction {} is not supported'.format(edge_dir)
+            hop_neighbor = sg_dst
         neighbors_dict['{}_hop_{}'.format(edge_dir, hop)] = hop_neighbor
         hop = hop + 1
     return neighbors_dict, edge_dict
