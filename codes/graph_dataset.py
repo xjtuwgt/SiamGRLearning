@@ -34,7 +34,6 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5):
         node_features = torch.cat([node_features, added_node_features], dim=0)
     return graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
 
-
 class CitationSubGraphDataset(Dataset):
     def __init__(self, g: DGLHeteroGraph, nentity: int, nrelation: int,
                  fanouts: list, special_entity2id: dict, special_relation2id: dict,
@@ -63,23 +62,3 @@ class CitationSubGraphDataset(Dataset):
     def __getitem__(self, idx):
         anchor_node_ids = torch.LongTensor([idx])
         cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])
-
-        # if self.edge_dir == 'in':
-        #     in_neighbors_dict, in_edge_dict = directed_sub_graph(anchor_node_ids=anchor_node_ids,
-        #                                                        cls_node_ids=cls_node_ids,
-        #                                                        g=self.g, fanouts=self.fanouts, edge_dir=self.edge_dir)
-        #     out_neighbors_dict, out_edge_dict = None, None
-        # elif self.edge_dir == 'out':
-        #     in_neighbors_dict, in_edge_dict = None, None
-        #     out_neighbors_dict, out_edge_dict = directed_sub_graph(anchor_node_ids=anchor_node_ids,
-        #                                                          cls_node_ids=cls_node_ids,
-        #                                                          g=self.g, fanouts=self.fanouts, edge_dir=self.edge_dir)
-        # elif self.edge_dir == 'all':
-        #     in_neighbors_dict, in_edge_dict = directed_sub_graph(anchor_node_ids=anchor_node_ids,
-        #                                                        cls_node_ids=cls_node_ids,
-        #                                                        g=self.g, fanouts=self.fanouts, edge_dir='in')
-        #     out_neighbors_dict, out_edge_dict = directed_sub_graph(anchor_node_ids=anchor_node_ids,
-        #                                                          cls_node_ids=cls_node_ids,
-        #                                                          g=self.g, fanouts=self.fanouts, edge_dir='out')
-        # else:
-        #     raise 'Edge direction {} is not supported'.format(self.edge_dir)

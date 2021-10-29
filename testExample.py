@@ -1,5 +1,6 @@
 from core.layers import EmbeddingLayer
 import torch
+import dgl
 from codes.graph_dataset import citation_graph_reconstruction, citation_khop_graph_reconstruction
 # from dgl.data import CoraGraphDataset
 #
@@ -19,12 +20,20 @@ from codes.graph_dataset import citation_graph_reconstruction, citation_khop_gra
 # print(graph)
 # print(node_features.shape)
 # print(nentities, nrelations)
-graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-    citation_khop_graph_reconstruction(dataset='citeseer', hop_num=4)
-print(graph)
-print(node_features.shape)
-print(number_of_nodes)
-print(number_of_relations)
-print(special_entity_dict)
-print(special_relation_dict)
-print(type(graph))
+# graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+#     citation_khop_graph_reconstruction(dataset='citeseer', hop_num=4)
+# print(graph)
+# print(node_features.shape)
+# print(number_of_nodes)
+# print(number_of_relations)
+# print(special_entity_dict)
+# print(special_relation_dict)
+# print(type(graph))
+
+
+g = dgl.graph((torch.tensor([0, 0, 1, 1, 1]), torch.tensor([1, 0, 2, 3, 2])))
+
+x = g.has_edges_between([1,2], [2,3])
+print(x)
+y = g.edge_ids(1, 2)
+print(y)

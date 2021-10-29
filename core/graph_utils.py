@@ -1,12 +1,5 @@
 from dgl.sampling import sample_neighbors
 from torch import Tensor
-from collections import OrderedDict
-import torch
-import dgl
-from copy import deepcopy
-import dgl.backend as F
-import numpy as np
-import scipy as sp
 def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
     special_entity_dict = {}
     special_relation_dict = {}
@@ -32,19 +25,23 @@ def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     graph.edata['tid'] = edge_type_ids
     return graph
 
-def directed_sub_graph(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, graph, edge_dir: str = 'in'):
+def sub_graph_sample(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, graph,
+                     edge_dir: str = 'in', bi_direct: bool=False):
     """
     :param anchor_node_ids: LongTensor
     :param cls_node_ids: LongTensor
-    :param fan-outs: size = hop_number, (list, each element represents the number of sampling neighbors)
-    :param g: dgl graph
-    :param edge_dir: 'in' or 'out'
+    :param fanouts: size = hop_number, (list, each element represents the number of sampling neighbors)
+    :param graph: dgl graph
+    :param edge_dir:  'in' or 'out'
+    :param bi_direct: bi-directional graph or not
     :return:
     """
     assert edge_dir in {'in', 'out'}
     neighbors_dict = {'anchor': anchor_node_ids}
     neighbors_dict['cls'] = cls_node_ids ## connected to all the other nodes for graph-level representation learning
     edge_dict = {} ## sampled edge dictionary: (head, t_id, tail)
+    number_of_edges = graph.number_of_edges()
+    new_added_bi_direct_edge_dict, added_bi_direct_edge_idx = {}, number_of_edges
     hop = 1
     hop_number = len(fanouts)
     while hop < hop_number + 1:
@@ -57,12 +54,25 @@ def directed_sub_graph(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: l
         sg_eids, sg_tids = sg.edata['_ID'], sg.edata['tid']
         sg_src_list, sg_dst_list = sg_src.tolist(), sg_dst.tolist()
         sg_eid_list, sg_tid_list = sg_eids.tolist(), sg_tids.tolist()
-        for eid, src_id, tid, dst_id in zip(sg_eid_list, sg_src_list, sg_tid_list, sg_dst_list):
+        if bi_direct:
+            has_rev_edges = graph.has_edges_between(sg_dst, sg_src)
+        else:
+            has_rev_edges = [False] * len(sg_src_list)
+        for eid, src_id, tid, dst_id, rev_edge_flag in zip(sg_eid_list, sg_src_list, sg_tid_list, sg_dst_list,
+                                                           has_rev_edges):
             edge_dict[eid] = (src_id, tid, dst_id)
+            if bi_direct:
+                if rev_edge_flag:
+                    rev_eid = graph.edge_ids(dst_id, src_id)
+                    rev_tid = graph.edata['tid'][rev_eid].data.item()
+                    edge_dict[rev_eid] = (dst_id, rev_tid, src_id)
+                else:
+                    new_added_bi_direct_edge_dict[added_bi_direct_edge_idx] = (dst_id, tid, src_id)
+                    added_bi_direct_edge_idx = added_bi_direct_edge_idx + 1
         if edge_dir == 'in':
             hop_neighbor = sg_src
         else:
             hop_neighbor = sg_dst
         neighbors_dict['{}_hop_{}'.format(edge_dir, hop)] = hop_neighbor
         hop = hop + 1
-    return neighbors_dict, edge_dict
+    return neighbors_dict, edge_dict, new_added_bi_direct_edge_dict
