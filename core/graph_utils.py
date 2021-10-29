@@ -1,5 +1,5 @@
 from dgl.sampling import sample_neighbors
-from torch import LongTensor
+from torch import Tensor
 from collections import OrderedDict
 import torch
 import dgl
@@ -22,13 +22,17 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
     special_relation_dict['cls_r'] = n_relations ## connect each node to cls token;
     n_relations = n_relations + 1
     special_relation_dict['loop_r'] = n_relations ## self-loop relation
-    n_relations = n_entities + 1
+    n_relations = n_relations + 1
     special_relation_dict['mask_r'] = n_relations ### for edge mask
     number_of_nodes = graph.number_of_nodes()
     number_of_relations = n_relations
     return graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
 
-def directed_sub_graph(anchor_node_ids: LongTensor, cls_node_ids: LongTensor, fanouts: list, graph, edge_dir: str = 'in'):
+def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
+    graph.edata['tid'] = edge_type_ids
+    return graph
+
+def directed_sub_graph(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, graph, edge_dir: str = 'in'):
     """
     :param anchor_node_ids: LongTensor
     :param cls_node_ids: LongTensor

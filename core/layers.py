@@ -16,7 +16,7 @@ class EmbeddingLayer(nn.Module):
         else:
             self.projection = Identity()
 
-    def init_with_tensor(self, data: Tensor, freeze=True):
+    def init_with_tensor(self, data: Tensor, freeze=False):
         self.embedding = nn.Embedding.from_pretrained(embeddings=data, freeze=freeze)
 
     def init(self, emb_init=0.1):
