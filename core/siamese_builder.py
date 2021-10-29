@@ -42,10 +42,3 @@ class SimSiam(nn.Module):
         p2 = self.predictor(z2) # NxC
 
         return p1, p2, z1.detach(), z2.detach()
-
-
-if __name__ == '__main__':
-    print('*' * 30)
-    base_encoder = nn.Linear(100, 300)
-    pretrained_encoder = SimSiam(base_encoder, 300)
-    print(pretrained_encoder)
