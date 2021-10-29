@@ -74,7 +74,9 @@ def default_parser():
                         help='Directory to save model and summaries')
     parser.add_argument('--data_path', type=str, default=HOME_DATA_FOLDER)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    parser.add_argument('--relation_number', type=int, default=2)
     parser.add_argument('--relation_emb_dim', type=int, default=300)
+    parser.add_argument('--node_number', type=int, default=300)
     parser.add_argument('--node_emb_dim', type=int, default=300)
     parser.add_argument('--siam_dim', type=int, default=1024)
     parser.add_argument('--siam_pred_dim', type=int, default=512)
