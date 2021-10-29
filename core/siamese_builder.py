@@ -3,7 +3,7 @@ class SimSiam(nn.Module):
     """
     Build a SimSiam model.
     """
-    def __init__(self, base_encoder, base_encoder_out_dim: int, dim=2048, pred_dim=512):
+    def __init__(self, base_encoder, base_encoder_out_dim: int, dim=1024, pred_dim=512):
         """
         dim: feature dimension (default: 2048)
         pred_dim: hidden dimension of the predictor (default: 512)
@@ -18,7 +18,7 @@ class SimSiam(nn.Module):
                                         nn.Linear(self.prev_dim, self.prev_dim, bias=False),
                                         nn.BatchNorm1d(self.prev_dim),
                                         nn.ReLU(inplace=True), # second layer
-                                        nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+                                        nn.Linear(self.prev_dim, dim, bias=False),
                                         nn.BatchNorm1d(dim, affine=False)) # output layer
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),

@@ -76,6 +76,8 @@ def default_parser():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--relation_emb_dim', type=int, default=300)
     parser.add_argument('--node_emb_dim', type=int, default=300)
+    parser.add_argument('--siam_dim', type=int, default=1024)
+    parser.add_argument('--siam_pred_dim', type=int, default=512)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--feat_drop', type=float, default=0.25)
     parser.add_argument('--attn_drop', type=float, default=0.25)
