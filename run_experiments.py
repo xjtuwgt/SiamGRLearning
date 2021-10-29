@@ -2,7 +2,7 @@ import logging
 import torch
 import sys
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
-from codes.gnn_encoder import GDTEncoder
+from codes.gnn_encoder import GraphSimSiamEncoder
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -28,7 +28,7 @@ for key, value in vars(args).items():
     logger.info('Hype-parameter\t{} = {}'.format(key, value))
 logging.info('*' * 75)
 #########################################################################
-graph_encoder = GDTEncoder(config=args)
+graph_encoder = GraphSimSiamEncoder(config=args)
 graph_encoder.to(args.device)
 # #########################################################################
 # # Show model information
