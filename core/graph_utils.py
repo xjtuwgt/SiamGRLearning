@@ -25,13 +25,13 @@ def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     graph.edata['tid'] = edge_type_ids
     return graph
 
-def sub_graph_sample(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, graph,
+def sub_graph_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list,
                      edge_dir: str = 'in', bi_direct: bool=False):
     """
+    :param graph: dgl graph
     :param anchor_node_ids: LongTensor
     :param cls_node_ids: LongTensor
     :param fanouts: size = hop_number, (list, each element represents the number of sampling neighbors)
-    :param graph: dgl graph
     :param edge_dir:  'in' or 'out'
     :param bi_direct: bi-directional graph or not
     :return:
@@ -67,12 +67,14 @@ def sub_graph_sample(anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: lis
                     rev_tid = graph.edata['tid'][rev_eid].data.item()
                     edge_dict[rev_eid] = (dst_id, rev_tid, src_id)
                 else:
-                    new_added_bi_direct_edge_dict[added_bi_direct_edge_idx] = (dst_id, tid, src_id)
-                    added_bi_direct_edge_idx = added_bi_direct_edge_idx + 1
+                    if (dst_id, tid, src_id) not in new_added_bi_direct_edge_dict:
+                        new_added_bi_direct_edge_dict[(dst_id, tid, src_id)] = added_bi_direct_edge_idx
+                        added_bi_direct_edge_idx = added_bi_direct_edge_idx + 1
         if edge_dir == 'in':
             hop_neighbor = sg_src
         else:
             hop_neighbor = sg_dst
         neighbors_dict['{}_hop_{}'.format(edge_dir, hop)] = hop_neighbor
         hop = hop + 1
+    new_added_bi_direct_edge_dict = dict([(v, k) for k, v in new_added_bi_direct_edge_dict.items()])
     return neighbors_dict, edge_dict, new_added_bi_direct_edge_dict

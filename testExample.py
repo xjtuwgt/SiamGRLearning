@@ -1,6 +1,7 @@
 from core.layers import EmbeddingLayer
 import torch
 import dgl
+from core.graph_utils import sub_graph_sample
 from codes.graph_dataset import citation_graph_reconstruction, citation_khop_graph_reconstruction
 # from dgl.data import CoraGraphDataset
 #
@@ -31,9 +32,18 @@ from codes.graph_dataset import citation_graph_reconstruction, citation_khop_gra
 # print(type(graph))
 
 
-g = dgl.graph((torch.tensor([0, 0, 1, 1, 1]), torch.tensor([1, 0, 2, 3, 2])))
+g = dgl.graph((torch.tensor([0, 0, 2, 1, 1, 1]), torch.tensor([1, 0, 0, 2, 3, 2])))
+g.add_nodes(2)
+g.edata['tid'] = torch.zeros(g.number_of_edges(), dtype=torch.long)
 
-x = g.has_edges_between([1,2], [2,3])
+anchor = torch.LongTensor([0])
+cls = torch.LongTensor([4])
+x, y, z = sub_graph_sample(graph=g, anchor_node_ids=anchor, cls_node_ids=cls, fanouts=[2,2], edge_dir='out', bi_direct=True)
 print(x)
-y = g.edge_ids(1, 2)
 print(y)
+print(z)
+
+# x = g.has_edges_between([1,2], [2,3])
+# print(x)
+# y = g.edge_ids(1, 2)
+# print(y)
