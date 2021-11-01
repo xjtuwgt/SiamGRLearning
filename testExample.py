@@ -25,8 +25,8 @@ from codes.graph_dataset import citation_graph_reconstruction, citation_khop_gra
 # print(graph)
 # print(node_features.shape)
 # print(nentities, nrelations)
-graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-    citation_khop_graph_reconstruction(dataset='cora', hop_num=4)
+# graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+#     citation_khop_graph_reconstruction(dataset='cora', hop_num=4)
 # print(graph)
 # print(node_features.shape)
 # print(number_of_nodes)

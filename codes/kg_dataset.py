@@ -13,5 +13,6 @@ if __name__ == '__main__':
     # for k, v in kg_data.relation2id.items():
     #     print(k, v)
     graph = knowledge_graph_construction_from_triples(num_entities=kg_data.n_entities,
-                                                      num_relations=kg_data.n_relations, triples=kg_data.train)
+                                                      num_relations=kg_data.n_relations,
+                                                      triples=kg_data.train, bi_directional=False)
     print(graph)

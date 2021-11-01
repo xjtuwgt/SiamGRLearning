@@ -99,5 +99,5 @@ def knowledge_graph_construction_from_triples(num_entities, num_relations, tripl
     graph = dgl.graph((src, dst), num_nodes=num_entities)
     graph.ndata.update({'nid': torch.arange(0, num_entities, dtype=torch.long)})
     graph.edata.update({'tid': torch.from_numpy(rel)})
-    print('Constructing graph takes {:.2f} seconds'.format(time() - start))
+    print('Constructing graph takes {:.4f} seconds'.format(time() - start))
     return graph

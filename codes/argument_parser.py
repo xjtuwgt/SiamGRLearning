@@ -73,8 +73,10 @@ def default_parser():
     parser.add_argument('--output_dir', type=str, default=OUTPUT_FOLDER,
                         help='Directory to save model and summaries')
     parser.add_argument('--data_path', type=str, default=HOME_DATA_FOLDER)
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--kg_data_path', type=str, default=KG_DATA_FOLDER)
     parser.add_argument('--kg_name', type=str, default='FB15k-237')
+    parser.add_argument('--kg_bi_directed', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--relation_number', type=int, default=2)
     parser.add_argument('--relation_emb_dim', type=int, default=300)
