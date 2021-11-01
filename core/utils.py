@@ -16,4 +16,5 @@ def seed_everything(seed: int) -> int:
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
     dgl.random.seed(seed)
+    dgl.seed(seed)
     return seed
