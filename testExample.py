@@ -3,7 +3,8 @@ import torch
 import dgl
 from core.kg_utils import KGDataset, knowledge_graph_construction_from_triples, kg_data_path_collection
 from core.graph_utils import graph_to_bidirected
-from core.graph_utils import sub_graph_neighbor_sample, sub_graph_neighbor_sample_unique, sub_graph_random_walk_sample
+from core.graph_utils import sub_graph_neighbor_sample, sub_graph_neighbor_sample_unique, \
+    sub_graph_random_walk_sample, sub_graph_extractor, cls_sub_graph_extractor
 from codes.citation_graph_dataset import citation_graph_reconstruction, citation_khop_graph_reconstruction
 # from dgl.data import CoraGraphDataset
 #
@@ -80,8 +81,9 @@ from codes.citation_graph_dataset import citation_graph_reconstruction, citation
 # print(x)
 # y = g.edge_ids(1, 2)
 # print(y)
-
+from core.utils import seed_everything
 from codes.kg_dataset import knowledge_graph_khop_reconstruction
+seed_everything(seed=42)
 kg_name = 'wn18rr'
 graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
     knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
@@ -90,10 +92,15 @@ print(number_of_relations, number_of_nodes)
 anchor = torch.LongTensor([0])
 cls = torch.LongTensor([special_entity_dict['cls']])
 x, y = sub_graph_neighbor_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                           fanouts=[5,10,5,5,5], edge_dir='in', debug=True)
+                           fanouts=[5,5,5,5,5], edge_dir='in', debug=True)
+print(len(y))
+# sub_graph = sub_graph_extractor(graph=graph, edge_dict=y)
+cls_sub_graph_extractor(graph=graph, edge_dict=y, neighbors_dict=x, special_relation_dict=special_relation_dict,
+                        bi_directed=True)
 
-x, y = sub_graph_random_walk_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                           fanouts=[5,10,5,5,5], edge_dir='in', debug=True)
+# x, y = sub_graph_random_walk_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
+#                            fanouts=[4] * 5, edge_dir='in', debug=True)
+# print(len(y))
 
 # if __name__ == '__main__':
 #     import os
