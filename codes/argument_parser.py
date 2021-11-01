@@ -5,7 +5,7 @@ import torch
 from os.path import join
 from core.utils import seed_everything
 from core.gpu_utils import get_single_free_gpu
-from evens import HOME_DATA_FOLDER, OUTPUT_FOLDER
+from evens import HOME_DATA_FOLDER, OUTPUT_FOLDER, KG_DATA_FOLDER
 
 def boolean_string(s):
     if s.lower() not in {'false', 'true'}:
@@ -73,6 +73,8 @@ def default_parser():
     parser.add_argument('--output_dir', type=str, default=OUTPUT_FOLDER,
                         help='Directory to save model and summaries')
     parser.add_argument('--data_path', type=str, default=HOME_DATA_FOLDER)
+    parser.add_argument('--kg_data_path', type=str, default=KG_DATA_FOLDER)
+    parser.add_argument('--kg_name', type=str, default='FB15k-237')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--relation_number', type=int, default=2)
     parser.add_argument('--relation_emb_dim', type=int, default=300)
