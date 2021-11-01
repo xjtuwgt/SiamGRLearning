@@ -1,5 +1,8 @@
 import numpy as np
 from os.path import join
+from time import time
+from dgl import DGLGraph
+import torch
 
 def kg_data_path_collection(kg_path, kg_name: str):
     entity_path = join(kg_path, kg_name, 'entities.dict')
@@ -79,6 +82,28 @@ class KGDataset(object):
         print('Finished. Read {} {} triples.'.format(len(heads), mode))
         return (heads, rels, tails)
 
+def knowledge_graph_construction_from_triples(num_entities, num_relations, triples, bi_directional=True):
+    """ Create a DGL graph. The graph is bidirectional because RGCN authors
+        use reversed relations.
+        This function also generates edge type and normalization factor
+        (reciprocal of node incoming degree)
+    """
+    start = time()
+    g = DGLGraph()
+    g.add_nodes(num_entities)
+    #+++++++++++++++++++++++++
+    src, rel, dst = triples
+    if bi_directional:
+        inv_rel = rel + num_relations
+        src, dst = np.concatenate((src, dst)), np.concatenate((dst, src))
+        rel = np.concatenate((rel, inv_rel))
+    # +++++++++++++++++++++++++
+    node_id = torch.arange(0, num_entities, dtype=torch.long)
+    g.ndata.update({'nid': node_id})
+    g.add_edges(src, dst, {'tid': torch.from_numpy(rel)})
+    print('Constructing graph takes {:.2f} seconds'.format(time() - start))
+    return g
+
 if __name__ == '__main__':
     import os
     from evens import KG_DATA_FOLDER
@@ -89,5 +114,8 @@ if __name__ == '__main__':
     # train_data = kg_data.train
     # print(train_data)
     # print(kg_data.entity2id)
-    for k, v in kg_data.relation2id.items():
-        print(k, v)
+    # for k, v in kg_data.relation2id.items():
+    #     print(k, v)
+    graph = knowledge_graph_construction_from_triples(num_entities=kg_data.n_entities,
+                                                      num_relations=kg_data.n_relations, triples=kg_data.train)
+    print(graph)
