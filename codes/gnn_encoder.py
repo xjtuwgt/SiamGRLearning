@@ -34,8 +34,8 @@ class GDTEncoder(nn.Module):
                                                       diff_head_tail=self.config.diff_head_tail,
                                                       ppr_diff=self.config.ppr_diff))
     def forward(self, batch_g):
-        rel_ids = batch_g.edata['tid']
         ent_ids = batch_g.ndata['nid']
+        rel_ids = batch_g.edata['tid']
         ent_features = self.node_embed_layer(ent_ids)
         rel_features = self.relation_embed_layer(rel_ids)
         with batch_g.local_scope():
