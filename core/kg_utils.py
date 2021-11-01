@@ -2,7 +2,6 @@ import dgl
 import numpy as np
 from os.path import join
 from time import time
-from dgl import DGLGraph
 import torch
 
 def kg_data_path_collection(kg_path, kg_name: str):
