@@ -1,3 +1,4 @@
+import dgl
 from dgl import DGLHeteroGraph
 import torch
 from torch.utils.data import Dataset
@@ -22,6 +23,7 @@ def citation_graph_reconstruction(dataset: str):
     return graph, node_features, nentities, nrealtions
 
 def citation_khop_graph_reconstruction(dataset: str, hop_num=5):
+    print('Bi-directional homogeneous graph: {}'.format(dataset))
     graph, node_features, nentities, nrealtions = citation_graph_reconstruction(dataset=dataset)
     graph, number_of_nodes, number_of_relations, \
     special_entity_dict, special_relation_dict = construct_special_graph_dictionary(graph=graph, n_entities=nentities,

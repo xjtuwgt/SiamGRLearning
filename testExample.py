@@ -58,22 +58,22 @@ graph, node_features, number_of_nodes, number_of_relations, special_entity_dict,
 # g.add_nodes(2)
 # g.edata['tid'] = torch.zeros(g.number_of_edges(), dtype=torch.long)
 #
-anchor = torch.LongTensor([0])
-cls = torch.LongTensor([special_entity_dict['cls']])
-x, y = sub_graph_neighbor_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                           fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
-# print(x)
-# print(y)
-# print(z)
-#
-x, y = sub_graph_neighbor_sample_unique(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                           fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
+# anchor = torch.LongTensor([0])
+# cls = torch.LongTensor([special_entity_dict['cls']])
+# x, y = sub_graph_neighbor_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
+#                            fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
 # # print(x)
 # # print(y)
 # # print(z)
-#
-sub_graph_random_walk_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                           fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
+# #
+# x, y = sub_graph_neighbor_sample_unique(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
+#                            fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
+# # # print(x)
+# # # print(y)
+# # # print(z)
+# #
+# sub_graph_random_walk_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
+#                            fanouts=[5,5,5,5,5], edge_dir='out', debug=True)
 
 # x = g.has_edges_between([1,2], [2,3])
 # print(x)

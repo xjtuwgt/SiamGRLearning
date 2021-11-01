@@ -5,17 +5,11 @@ from dgl.sampling.randomwalks import random_walk, pack_traces
 from torch import Tensor
 from time import time
 
-def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int,
-                                       is_bidirected=False, is_hete_graph=False):
+def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
     special_entity_dict = {}
     special_relation_dict = {}
     number_nodes = n_entities
     assert number_nodes == graph.number_of_nodes()
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    if is_bidirected:
-        graph = graph_to_bidirected(graph=graph, number_of_relations=n_relations, is_hete_graph=is_hete_graph)
-        if is_hete_graph:
-            n_relations = 2 * n_relations
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     special_entity_dict['cls'] = number_nodes ## for graph-level representation learning
     special_entity_dict['mask'] = number_nodes + 1 ## for node mask
