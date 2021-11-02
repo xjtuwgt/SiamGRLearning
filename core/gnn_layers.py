@@ -73,7 +73,6 @@ class RGDTLayer(nn.Module):
         self.attn_h = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_t = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_r = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
-        # self.leaky_relu = nn.LeakyReLU(negative_slope) ### for attention computation
         self.attn_activation = nn.PReLU(init=negative_slope)  ### for attention computation
 
         if residual:
@@ -280,7 +279,6 @@ class GDTLayer(nn.Module):
             eh = (feat_head * self.attn_h).sum(dim=-1).unsqueeze(-1)
             et = (feat_tail * self.attn_t).sum(dim=-1).unsqueeze(-1)
             ###+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            ###+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             graph.srcdata.update({'ft': feat_head, 'eh': eh})
             graph.dstdata.update({'et': et})
             graph.apply_edges(fn.u_add_v('eh', 'et', 'e'))
@@ -301,7 +299,6 @@ class GDTLayer(nn.Module):
             # +++++++++++++++++++++++++++++++++++++++
             ff_rst = self.feed_forward_layer(self.feat_drop(self.ff_layer_norm(rst)))
             rst = self.feat_drop(ff_rst) + rst # residual
-            # +++++++++++++++++++++++++++++++++++++++
             # +++++++++++++++++++++++++++++++++++++++
             # activation
             if self.activation:
