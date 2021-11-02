@@ -1,10 +1,6 @@
-import dgl
-from dgl import DGLHeteroGraph
 import torch
-from torch.utils.data import Dataset
 from dgl.data import CoraGraphDataset, CiteseerGraphDataset, PubmedGraphDataset
 from core.graph_utils import add_relation_ids_to_graph, construct_special_graph_dictionary
-
 def citation_graph_reconstruction(dataset: str):
     if dataset == 'cora':
         data = CoraGraphDataset()
@@ -36,32 +32,3 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5):
         node_features = torch.cat([node_features, added_node_features], dim=0)
     graph.ndata.update({'nid': torch.arange(0, number_of_nodes, dtype=torch.long)})
     return graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
-
-class CitationSubGraphDataset(Dataset):
-    def __init__(self, g: DGLHeteroGraph, nentity: int, nrelation: int,
-                 fanouts: list, special_entity2id: dict, special_relation2id: dict,
-                 reverse=False, edge_dir='in'):
-        assert len(fanouts) > 0
-        self.fanouts = fanouts
-        self.hop_num = len(fanouts)
-        self.g = g
-        #####################
-        if len(special_entity2id) > 0:
-            self.len = g.number_of_nodes() - len(special_entity2id) ## no need to extract sub-graph of special entities
-        else:
-            self.len = g.number_of_nodes()
-        #####################
-        self.nentity = nentity
-        self.nrelation = nrelation
-        self.reverse = reverse
-        self.fanouts = fanouts ## list of int == number of hops for sampling
-        self.edge_dir = edge_dir ## "in", "out", "all"
-        self.special_entity2id = special_entity2id
-        self.special_relation2id = special_relation2id
-
-    def __len__(self):
-        return self.len
-
-    def __getitem__(self, idx):
-        anchor_node_ids = torch.LongTensor([idx])
-        cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])

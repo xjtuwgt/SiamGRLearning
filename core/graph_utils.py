@@ -166,8 +166,9 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
         print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
     return neighbors_dict, edge_dict
 
-def sub_graph_extractor(graph, edge_dict: dict, bi_directed:bool = True):
-    assert len(edge_dict) > 0, "Oh no! This assertion failed due to edge dictionary is empty {}".format(edge_dict)
+def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directed:bool = True):
+    if len(edge_dict) == 0:
+        return single_node_graph_extractor(graph=graph, neighbors_dict=neighbors_dict)
     edge_ids = list(edge_dict.keys())
     if bi_directed:
         parent_triples = np.array(list(edge_dict.values()))
@@ -180,10 +181,16 @@ def sub_graph_extractor(graph, edge_dict: dict, bi_directed:bool = True):
     subgraph = graph.edge_subgraph(edges=edge_ids)
     return subgraph
 
+def single_node_graph_extractor(graph, neighbors_dict: dict):
+    anchor_ids = neighbors_dict['anchor'][0]
+    sub_graph = graph.subgraph(anchor_ids)
+    return sub_graph
+
 def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
                             bi_directed: bool = True, debug=False):
     start_time = time() if debug else 0
-    subgraph = sub_graph_extractor(graph=graph, edge_dict=edge_dict, bi_directed=bi_directed)
+    subgraph = sub_graph_extractor(graph=graph, edge_dict=edge_dict, bi_directed=bi_directed,
+                                   neighbors_dict=neighbors_dict)
     subgraph.add_nodes(1)
     cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
     subgraph.ndata['nid'][-1] = cls_parent_node_id

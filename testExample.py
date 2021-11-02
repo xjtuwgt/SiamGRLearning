@@ -7,48 +7,31 @@ from core.graph_utils import graph_to_bidirected
 from core.graph_utils import sub_graph_neighbor_sample, sub_graph_neighbor_sample_unique, \
     sub_graph_random_walk_sample, cls_sub_graph_extractor
 from codes.citation_graph_dataset import citation_graph_reconstruction, citation_khop_graph_reconstruction
+from codes.graph_dataloader import SubGraphDataset
+from codes.knowledge_graph_dataset import knowledge_graph_khop_reconstruction
+from core.utils import seed_everything
+seed_everything(seed=43)
+fanouts = [10,5,3,2]
 
-
-
-# from core.utils import seed_everything
-# from codes.kg_dataset import knowledge_graph_khop_reconstruction
-# seed_everything(seed=43)
-# kg_name = 'FB15k-237'
-# graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-#     knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
-# print((graph.in_degrees() == 0).sum())
-# # print(number_of_relations, number_of_nodes)
-# cls = torch.LongTensor([special_entity_dict['cls']])
-# count = 0
-# for node_id in tqdm(range(graph.number_of_nodes())):
-#     anchor = torch.LongTensor([node_id])
-#     x, y = sub_graph_neighbor_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-#                                fanouts=[10,5,5,5], edge_dir='out', debug=False)
-#     if len(y) == 0:
-#         count = count + 1
-#         continue
-#     # print(len(y))
-#     # sub_graph = sub_graph_extractor(graph=graph, edge_dict=y)
-#     x, y = cls_sub_graph_extractor(graph=graph, edge_dict=y, neighbors_dict=x, special_relation_dict=special_relation_dict,
-#                             bi_directed=True, debug=False)
-# #     # print(x)
-# print(count)
+kg_name = 'FB15k-237'
+graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+    knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
+print((graph.in_degrees() == 0).sum())
+kg_dataset = SubGraphDataset(g=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+                                   special_entity2id=special_entity_dict,
+                                   special_relation2id=special_relation_dict,
+                                   fanouts=fanouts)
+for _ in tqdm(range(kg_dataset.len)):
+    kg_dataset.__getitem__(_)
 
 ##++++++++++++++
-citation_data_name = 'citeseer'
-graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-    citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=5)
-print((graph.in_degrees() == 0).sum())
-cls = torch.LongTensor([special_entity_dict['cls']])
-count = 0
-for node_id in tqdm(range(graph.number_of_nodes())):
-    anchor = torch.LongTensor([node_id])
-    x, y = sub_graph_neighbor_sample(graph=graph, anchor_node_ids=anchor, cls_node_ids=cls,
-                               fanouts=[10,5,5,5,5], edge_dir='in', debug=False)
-    if len(y) == 0:
-        count = count + 1
-        continue
-    x, y = cls_sub_graph_extractor(graph=graph, edge_dict=y, neighbors_dict=x, special_relation_dict=special_relation_dict,
-                            bi_directed=True, debug=False)
-#     # print(x)
-print(count)
+# citation_data_name = 'citeseer'
+# graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+#     citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=5)
+# print((graph.in_degrees() == 0).sum())
+# citation_dataset = SubGraphDataset(g=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+#                                    special_entity2id=special_entity_dict,
+#                                    special_relation2id=special_relation_dict,
+#                                    fanouts=fanouts)
+# for _ in tqdm(range(citation_dataset.len)):
+#     citation_dataset.__getitem__(_)

@@ -1,7 +1,40 @@
-from core.graph_utils import directed_sub_graph
 from dgl import DGLHeteroGraph
 import torch
-import dgl
 from torch.utils.data import Dataset
+from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor
 
+class SubGraphDataset(Dataset):
+    def __init__(self, g: DGLHeteroGraph, nentity: int, nrelation: int,
+                 fanouts: list, special_entity2id: dict, special_relation2id: dict,
+                 bi_directed=True, edge_dir='in'):
+        assert len(fanouts) > 0
+        self.fanouts = fanouts
+        self.hop_num = len(fanouts)
+        self.g = g
+        #####################
+        if len(special_entity2id) > 0:
+            self.len = g.number_of_nodes() - len(special_entity2id) ## no need to extract sub-graph of special entities
+        else:
+            self.len = g.number_of_nodes()
+        #####################
+        self.nentity = nentity
+        self.nrelation = nrelation
+        self.bi_directed = bi_directed
+        self.fanouts = fanouts ## list of int == number of hops for sampling
+        self.edge_dir = edge_dir ## "in", "out"
+        self.special_entity2id = special_entity2id
+        self.special_relation2id = special_relation2id
 
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        anchor_node_ids = torch.LongTensor([idx])
+        cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])
+        neighbors_dict, edge_dict = sub_graph_neighbor_sample(graph=self.g, anchor_node_ids=anchor_node_ids,
+                                                             cls_node_ids=cls_node_ids, fanouts=self.fanouts,
+                                                             edge_dir=self.edge_dir, debug=False)
+        subgraph, parent2sub_dict = cls_sub_graph_extractor(graph=self.g, edge_dict=edge_dict,
+                                                            neighbors_dict=neighbors_dict,
+                                                            special_relation_dict=self.special_relation2id,
+                                                            bi_directed=self.bi_directed, debug=False)
