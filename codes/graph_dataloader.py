@@ -7,7 +7,7 @@ class SubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, bi_directed=True, edge_dir='in'):
         assert len(fanouts) > 0
-        self.fanouts = fanouts
+        self.fanouts = fanouts ## list of int == number of hops for sampling
         self.hop_num = len(fanouts)
         self.g = graph
         #####################
@@ -16,13 +16,10 @@ class SubGraphDataset(Dataset):
         else:
             self.len = graph.number_of_nodes()
         #####################
-        self.nentity = nentity
-        self.nrelation = nrelation
+        self.nentity, self.nrelation = nentity, nrelation
         self.bi_directed = bi_directed
-        self.fanouts = fanouts ## list of int == number of hops for sampling
         self.edge_dir = edge_dir ## "in", "out"
-        self.special_entity2id = special_entity2id
-        self.special_relation2id = special_relation2id
+        self.special_entity2id, self.special_relation2id = special_entity2id, special_relation2id
 
     def __len__(self):
         return self.len
