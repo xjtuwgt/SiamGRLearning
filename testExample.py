@@ -7,7 +7,7 @@ from core.graph_utils import graph_to_bidirected
 from core.graph_utils import sub_graph_neighbor_sample, sub_graph_neighbor_sample_unique, \
     sub_graph_random_walk_sample, cls_sub_graph_extractor
 from codes.citation_graph_dataset import citation_graph_reconstruction, citation_khop_graph_reconstruction
-from codes.graph_dataloader import SubGraphDataset
+from codes.graph_data_loader import SubGraphDataset
 from codes.knowledge_graph_dataset import knowledge_graph_khop_reconstruction
 from core.utils import seed_everything
 seed_everything(seed=43)
