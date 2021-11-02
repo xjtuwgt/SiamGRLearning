@@ -167,6 +167,7 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
     return neighbors_dict, edge_dict
 
 def sub_graph_extractor(graph, edge_dict: dict, bi_directed:bool = True):
+    assert len(edge_dict) > 0, "Oh no! This assertion failed due to edge dictionary is empty {}".format(edge_dict)
     edge_ids = list(edge_dict.keys())
     if bi_directed:
         parent_triples = np.array(list(edge_dict.values()))
@@ -180,7 +181,8 @@ def sub_graph_extractor(graph, edge_dict: dict, bi_directed:bool = True):
     return subgraph
 
 def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
-                            bi_directed:bool=True):
+                            bi_directed: bool = True, debug=False):
+    start_time = time() if debug else 0
     subgraph = sub_graph_extractor(graph=graph, edge_dict=edge_dict, bi_directed=bi_directed)
     subgraph.add_nodes(1)
     cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
@@ -196,14 +198,15 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     cls_dst_nodes = torch.arange(0, subgraph.number_of_nodes()-1)
     cls_src, cls_dst = torch.cat((cls_src_nodes, cls_dst_nodes)), np.concatenate((cls_dst_nodes, cls_src_nodes))
     subgraph.add_edges(cls_src, cls_dst, {'tid': cls_relation})
+    end_time = time() if debug else 0
+    if debug:
+        print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict
 
 def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict, special_relation_dict: dict):
-    cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
     anc_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
-    cls_idx = parent2sub_dict[cls_parent_node_id]
     anc_idx = parent2sub_dict[anc_parent_node_id]
-    assert cls_idx == subgraph.number_of_nodes() - 1
+    assert anc_idx < subgraph.number_of_nodes() - 1
 
 
     # print(parent_node_ids)
