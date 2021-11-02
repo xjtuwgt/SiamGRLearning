@@ -73,7 +73,8 @@ class RGDTLayer(nn.Module):
         self.attn_h = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_t = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_r = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
-        self.leaky_relu = nn.LeakyReLU(negative_slope) ### for attention computation
+        # self.leaky_relu = nn.LeakyReLU(negative_slope) ### for attention computation
+        self.attn_activation = nn.PReLU(init=negative_slope)  ### for attention computation
 
         if residual:
             if in_ent_feats != out_ent_feats:
@@ -143,7 +144,7 @@ class RGDTLayer(nn.Module):
             graph.srcdata.update({'ft': feat_head, 'eh': eh})
             graph.dstdata.update({'et': et})
             graph.apply_edges(fn.u_add_v('eh', 'et', 'e'))
-            e = self.leaky_relu(graph.edata.pop('e') + er)
+            e = self.attn_activation(graph.edata.pop('e') + er)
             if self.ppr_diff:
                 graph.edata['a'] = edge_softmax(graph, e)
                 rst = self.ppr_estimation(graph=graph)
@@ -219,7 +220,7 @@ class GDTLayer(nn.Module):
 
         self.attn_h = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_t = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
-        self.leaky_relu = nn.LeakyReLU(negative_slope) ### for attention computation
+        self.attn_activation = nn.PReLU(init=negative_slope) ### for attention computation
 
         if residual:
             if in_ent_feats != out_ent_feats:
@@ -283,7 +284,7 @@ class GDTLayer(nn.Module):
             graph.srcdata.update({'ft': feat_head, 'eh': eh})
             graph.dstdata.update({'et': et})
             graph.apply_edges(fn.u_add_v('eh', 'et', 'e'))
-            e = self.leaky_relu(graph.edata.pop('e'))
+            e = self.attn_activation(graph.edata.pop('e'))
             if self.ppr_diff:
                 graph.edata['a'] = edge_softmax(graph, e)
                 rst = self.ppr_estimation(graph=graph)

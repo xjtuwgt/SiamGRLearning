@@ -11,7 +11,7 @@ from codes.graph_dataloader import SubGraphDataset
 from codes.knowledge_graph_dataset import knowledge_graph_khop_reconstruction
 from core.utils import seed_everything
 seed_everything(seed=43)
-fanouts = [10,5,3,2]
+fanouts = [10,5,5,5]
 
 ##++++++++++++++
 # kg_name = 'FB15k-237'
