@@ -18,8 +18,8 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     for hop in range(hop_num):
-        special_relation_dict['in_hop_{}'.format(hop + 1)] = n_relations + (2 * hop)
-        special_relation_dict['out_hop_{}'.format(hop + 1)] = n_relations + (2 * hop + 1)
+        special_relation_dict['in_hop_{}_r'.format(hop + 1)] = n_relations + (2 * hop)
+        special_relation_dict['out_hop_{}_r'.format(hop + 1)] = n_relations + (2 * hop + 1)
     n_relations = n_relations + 2 * hop_num
     special_relation_dict['cls_r'] = n_relations ## connect each node to cls token;
     n_relations = n_relations + 1
