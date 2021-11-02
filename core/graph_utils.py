@@ -182,6 +182,11 @@ def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directe
     return subgraph
 
 def single_node_graph_extractor(graph, neighbors_dict: dict):
+    """
+    :param graph:
+    :param neighbors_dict: int --> (anchor_ids, anchor_counts)
+    :return:
+    """
     anchor_ids = neighbors_dict['anchor'][0]
     sub_graph = graph.subgraph(anchor_ids)
     return sub_graph
