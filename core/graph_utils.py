@@ -210,18 +210,8 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict
 
-def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict, special_relation_dict: dict):
-    anc_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
-    anc_idx = parent2sub_dict[anc_parent_node_id]
-    assert anc_idx < subgraph.number_of_nodes() - 1
-
-
-    # print(parent_node_ids)
-    # print(sub_node_ids)
-
-    # anchor_node = neighbors_dict['anchor'][0][0].data.item()
-    # anchor_node_idx = (subgraph.ndata['nid'] == anchor_node).nonzero(as_tuple=True)[0].data.item()
-    # print(anchor_node_idx, cls_node_idx)
-
-    # print(anchor_node)
-    # print(subgraph.ndata['nid'])
+def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
+                               special_relation_dict: dict, bi_directed: bool = True):
+    anch_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
+    anch_idx = parent2sub_dict[anch_parent_node_id]
+    assert anch_idx < subgraph.number_of_nodes() - 1
