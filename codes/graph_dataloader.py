@@ -4,18 +4,17 @@ from torch.utils.data import Dataset
 from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor
 
 class SubGraphDataset(Dataset):
-    def __init__(self, g: DGLHeteroGraph, nentity: int, nrelation: int,
-                 fanouts: list, special_entity2id: dict, special_relation2id: dict,
-                 bi_directed=True, edge_dir='in'):
+    def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
+                 special_entity2id: dict, special_relation2id: dict, bi_directed=True, edge_dir='in'):
         assert len(fanouts) > 0
         self.fanouts = fanouts
         self.hop_num = len(fanouts)
-        self.g = g
+        self.g = graph
         #####################
         if len(special_entity2id) > 0:
-            self.len = g.number_of_nodes() - len(special_entity2id) ## no need to extract sub-graph of special entities
+            self.len = graph.number_of_nodes() - len(special_entity2id) ## no need to extract sub-graph of special entities
         else:
-            self.len = g.number_of_nodes()
+            self.len = graph.number_of_nodes()
         #####################
         self.nentity = nentity
         self.nrelation = nrelation
