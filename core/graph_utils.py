@@ -6,6 +6,7 @@ from dgl.sampling import sample_neighbors
 from dgl.sampling.randomwalks import random_walk
 from torch import Tensor
 from time import time
+import copy
 
 def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
     """
@@ -251,8 +252,14 @@ def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: 
     assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
     hop_neighbor_ids, hop_neighbor_freq = neighbors_dict[hop_neighbor]
     if hop_neighbor_ids.shape[0] == 0:
-        return subgraph
+        aug_sub_graph = copy.deepcopy(subgraph)
+        number_of_nodes = subgraph.number_of_nodes()
+        node_ids = torch.arange(number_of_nodes - 1)
+        self_loop_r = torch.LongTensor(number_of_nodes - 1).fill_(special_relation_dict['loop_r'])
+        aug_sub_graph.add_edges(node_ids, node_ids, {'tid': self_loop_r})
+        return subgraph, aug_sub_graph
     hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
+
 
 
 

@@ -1,5 +1,6 @@
 import logging
 import torch
+from torch import nn
 import sys
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.gnn_encoder import GraphSimSiamEncoder
@@ -37,3 +38,6 @@ logging.info('Model Parameter Configuration:')
 for name, param in graph_encoder.named_parameters():
     logging.info('Parameter {}: {}, require_grad = {}'.format(name, str(param.size()), str(param.requires_grad)))
 logging.info('*' * 75)
+# #########################################################################
+loss_function = nn.CosineSimilarity(dim=1)
+# #########################################################################

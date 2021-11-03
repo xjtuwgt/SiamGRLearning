@@ -33,7 +33,6 @@ class SubGraphDataset(Dataset):
         neighbors_dict, edge_dict = sub_graph_neighbor_sample(graph=self.g, anchor_node_ids=anchor_node_ids,
                                                              cls_node_ids=cls_node_ids, fanouts=samp_fanouts,
                                                              edge_dir=self.edge_dir, debug=False)
-        print(neighbors_dict)
         subgraph, parent2sub_dict = cls_sub_graph_extractor(graph=self.g, edge_dict=edge_dict,
                                                             neighbors_dict=neighbors_dict,
                                                             special_relation_dict=self.special_relation2id,
