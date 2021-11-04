@@ -172,7 +172,7 @@ def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_d
     :return:
     """
     assert 'cls_r' in special_relation_dict
-    subgraph.add(1) ## the last node is the cls_node
+    subgraph.add_nodes(1) ## the last node is the cls_node
     subgraph.ndata['nid'][-1] = cls_parent_node_id
     parent_node_ids, sub_node_ids = subgraph.ndata['nid'].tolist(), subgraph.nodes().tolist()
     parent2sub_dict = dict(zip(parent_node_ids, sub_node_ids))
@@ -261,6 +261,3 @@ def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, spec
     aug_sub_graph, _ = sub_graph_cls_addition(subgraph=aug_sub_graph, cls_parent_node_id=cls_parent_node_id,
                                               special_relation_dict=special_relation_dict)
     return aug_sub_graph
-
-
-

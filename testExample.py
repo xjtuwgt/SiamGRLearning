@@ -13,21 +13,20 @@ from codes.knowledge_graph_dataset import knowledge_graph_khop_reconstruction
 from core.utils import seed_everything
 from numpy import random
 seed_everything(seed=45)
-
 ##++++++++++++++
-# kg_name = 'FB15k-237'
-# fanouts = [10,5,5,5]
-# graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-#     knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
-# print((graph.in_degrees() == 0).sum())
-# start_time = time()
-# kg_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
-#                                    special_entity2id=special_entity_dict,
-#                                    special_relation2id=special_relation_dict,
-#                                    fanouts=fanouts)
-# for _ in tqdm(range(kg_dataset.len)):
-#     kg_dataset.__getitem__(_)
-# print('Run time = {:.4f}'.format(time() - start_time))
+kg_name = 'FB15k-237'
+fanouts = [10,5,5,5]
+graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+    knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
+print((graph.in_degrees() == 0).sum())
+start_time = time()
+kg_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+                                   special_entity2id=special_entity_dict,
+                                   special_relation2id=special_relation_dict,
+                                   fanouts=fanouts)
+for _ in tqdm(range(kg_dataset.len)):
+    kg_dataset.__getitem__(_)
+print('Run time = {:.4f}'.format(time() - start_time))
 ##++++++++++++++
 # citation_data_name = 'cora'
 # graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
@@ -50,40 +49,40 @@ seed_everything(seed=45)
 # for _ in range(10):
 #     y = random.choice(np.arange(10), 1)
 #     print(y)
-import scipy.sparse.linalg
-src_ids = torch.tensor([0, 1, 2, 3, 1, 2])
-dst_ids = torch.tensor([0, 1, 2, 3, 2, 1])
-graph = dgl.graph((src_ids, dst_ids), num_nodes=5)
-
-cls_nodes = torch.tensor([4] * 4, dtype=torch.long)
-node_ids = torch.arange(4)
-
-graph.add_edges(cls_nodes, node_ids)
-graph.add_edges(node_ids, cls_nodes)
-
-graph_matrix = dgl.khop_adj(graph, 1).numpy()
-diag_maxtrix = np.diag(graph_matrix.sum(axis=1))
-lap_matrix = (diag_maxtrix - graph_matrix)
-norm_lap_matrix = np.eye(5) - np.matmul(np.diag(1.0/graph_matrix.sum(axis=1)), graph_matrix)
-print(norm_lap_matrix)
-# print(graph_matrix)
-# print(lap_matrix)
-x = np.linalg.eig(norm_lap_matrix)
-print(x[0])
-print(x[0].max())
-
-# print(graph)
-# print(dgl.laplacian_lambda_max(graph))
-
-graph.add_edges([3,2], [2,3])
-graph_matrix = dgl.khop_adj(graph, 1).numpy()
-diag_maxtrix = np.diag(graph_matrix.sum(axis=1))
-lap_matrix = (diag_maxtrix - graph_matrix)
-norm_lap_matrix = np.eye(5) - np.matmul(np.diag(1.0/graph_matrix.sum(axis=1)), graph_matrix)
+# import scipy.sparse.linalg
+# src_ids = torch.tensor([0, 1, 2, 3, 1, 2])
+# dst_ids = torch.tensor([0, 1, 2, 3, 2, 1])
+# graph = dgl.graph((src_ids, dst_ids), num_nodes=5)
+#
+# cls_nodes = torch.tensor([4] * 4, dtype=torch.long)
+# node_ids = torch.arange(4)
+#
+# graph.add_edges(cls_nodes, node_ids)
+# graph.add_edges(node_ids, cls_nodes)
+#
+# graph_matrix = dgl.khop_adj(graph, 1).numpy()
+# diag_maxtrix = np.diag(graph_matrix.sum(axis=1))
+# lap_matrix = (diag_maxtrix - graph_matrix)
+# norm_lap_matrix = np.eye(5) - np.matmul(np.diag(1.0/graph_matrix.sum(axis=1)), graph_matrix)
 # print(norm_lap_matrix)
-x = np.linalg.eig(norm_lap_matrix)
-print(x[0])
-print(x[0].max())
+# # print(graph_matrix)
+# # print(lap_matrix)
+# x = np.linalg.eig(norm_lap_matrix)
+# print(x[0])
+# print(x[0].max())
+#
+# # print(graph)
+# # print(dgl.laplacian_lambda_max(graph))
+#
+# graph.add_edges([3,2], [2,3])
+# graph_matrix = dgl.khop_adj(graph, 1).numpy()
+# diag_maxtrix = np.diag(graph_matrix.sum(axis=1))
+# lap_matrix = (diag_maxtrix - graph_matrix)
+# norm_lap_matrix = np.eye(5) - np.matmul(np.diag(1.0/graph_matrix.sum(axis=1)), graph_matrix)
+# # print(norm_lap_matrix)
+# x = np.linalg.eig(norm_lap_matrix)
+# print(x[0])
+# print(x[0].max())
 # graph_matrix = graph.adjacency_matrix()
 # print(graph_matrix)
 
