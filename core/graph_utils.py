@@ -7,7 +7,7 @@ from dgl.sampling.randomwalks import random_walk
 from torch import Tensor
 from time import time
 import copy
-
+##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
     """
     :param graph:
@@ -47,43 +47,6 @@ def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     """
     graph.edata['tid'] = edge_type_ids
     return graph
-
-def sub_graph_neighbor_sample_unique(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list,
-                     edge_dir: str = 'in', debug=False):
-    """
-    :param graph: dgl graph
-    :param anchor_node_ids: LongTensor
-    :param cls_node_ids: LongTensor
-    :param fanouts: size = hop_number, (list, each element represents the number of sampling neighbors)
-    :param edge_dir:  'in' or 'out'
-    :return:
-    """
-    assert edge_dir in {'in', 'out'}
-    start_time = time() if debug else 0
-    neighbors_dict = {'anchor': (anchor_node_ids, torch.tensor([1], dtype=torch.long)),
-                      'cls': (cls_node_ids, torch.tensor([1], dtype=torch.long))}
-    edge_dict = {} ## sampled edge dictionary: (head, t_id, tail)
-    hop, hop_number = 1, len(fanouts)
-    while hop < hop_number + 1:
-        if hop == 1:
-            node_ids = neighbors_dict['anchor']
-        else:
-            node_ids = neighbors_dict['{}_hop_{}'.format(edge_dir, hop - 1)]
-        sg = sample_neighbors(g=graph, nodes=node_ids[0], edge_dir=edge_dir, fanout=fanouts[hop - 1])
-        sg_src, sg_dst = sg.edges()
-        sg_eids, sg_tids = sg.edata[dgl.EID], sg.edata['tid']
-        sg_src_list, sg_dst_list = sg_src.tolist(), sg_dst.tolist()
-        sg_eid_list, sg_tid_list = sg_eids.tolist(), sg_tids.tolist()
-        for _, eid in enumerate(sg_eid_list):
-            edge_dict[eid] = (sg_src_list[_], sg_tid_list[_], sg_dst_list[_])
-        hop_neighbor = sg_src if edge_dir == 'in' else sg_dst
-        hop_neighbor, hop_neighbor_counts = torch.unique(hop_neighbor, return_counts=True)
-        neighbors_dict['{}_hop_{}'.format(edge_dir, hop)] = (hop_neighbor, hop_neighbor_counts)
-        hop = hop + 1
-    end_time = time() if debug else 0
-    if debug:
-        print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
-    return neighbors_dict, edge_dict
 
 def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, edge_dir: str = 'in',
                               debug=False):
@@ -176,12 +139,13 @@ def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directe
     :return:
     """
     if len(edge_dict) == 0:
+        assert 'anchor' in neighbors_dict
         return single_node_graph_extractor(graph=graph, neighbors_dict=neighbors_dict)
     edge_ids = list(edge_dict.keys())
     if bi_directed:
         parent_triples = np.array(list(edge_dict.values()))
         rev_edge_ids = graph.edge_ids(parent_triples[:,2], parent_triples[:,0]).tolist()
-        rev_edge_ids = [_ for _ in rev_edge_ids if _ not in edge_dict]
+        rev_edge_ids = [_ for _ in rev_edge_ids if _ not in edge_dict] ## adding new edges as graph is bi_directed
         rev_edge_ids = sorted(set(rev_edge_ids), key=rev_edge_ids.index)
     else:
         rev_edge_ids = []
@@ -199,22 +163,16 @@ def single_node_graph_extractor(graph, neighbors_dict: dict):
     sub_graph = graph.subgraph(anchor_ids)
     return sub_graph
 
-def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
-                            bi_directed: bool = True, debug=False):
+def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_dict: dict):
     """
-    :param graph:
-    :param edge_dict:
-    :param neighbors_dict:
-    :param special_relation_dict:
-    :param bi_directed:
-    :param debug:
-    :return: adding cls node and bi-directional edges with 'cls_r'
+    add one cls node into sub-graph as super-node
+    :param subgraph:
+    :param cls_parent_node_id: cls node shared across all subgraphs
+    :param special_relation_dict: {cls_r: cls_r index}
+    :return:
     """
-    start_time = time() if debug else 0
-    subgraph = sub_graph_extractor(graph=graph, edge_dict=edge_dict, bi_directed=bi_directed,
-                                   neighbors_dict=neighbors_dict)
-    subgraph.add_nodes(1)
-    cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
+    assert 'cls_r' in special_relation_dict
+    subgraph.add(1) ## the last node is the cls_node
     subgraph.ndata['nid'][-1] = cls_parent_node_id
     parent_node_ids, sub_node_ids = subgraph.ndata['nid'].tolist(), subgraph.nodes().tolist()
     parent2sub_dict = dict(zip(parent_node_ids, sub_node_ids))
@@ -226,21 +184,43 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     cls_src_nodes = torch.tensor(cls_src_nodes, dtype=torch.long)
     cls_dst_nodes = torch.arange(0, subgraph.number_of_nodes()-1)
     cls_src, cls_dst = torch.cat((cls_src_nodes, cls_dst_nodes)), np.concatenate((cls_dst_nodes, cls_src_nodes))
+    ##bi-directional cls_nodes
     subgraph.add_edges(cls_src, cls_dst, {'tid': cls_relation})
+    return subgraph, parent2sub_dict
+
+def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
+                            bi_directed: bool = True, debug=False):
+    """
+    extract the sub-graph according to edge_dict and then add cls_node as super node
+    :param graph: original large graph
+    :param edge_dict: sampling edges
+    :param neighbors_dict: multi-hop information
+    :param special_relation_dict:
+    :param bi_directed:
+    :param debug:
+    :return: adding cls node and bi-directional edges with 'cls_r'
+    """
+    start_time = time() if debug else 0
+    subgraph = sub_graph_extractor(graph=graph, edge_dict=edge_dict, bi_directed=bi_directed,
+                                   neighbors_dict=neighbors_dict)
+    cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
+    subgraph, parent2sub_dict = sub_graph_cls_addition(subgraph=subgraph, cls_parent_node_id=cls_parent_node_id,
+                                                       special_relation_dict=special_relation_dict)
     end_time = time() if debug else 0
     if debug:
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict
 
-def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict, hop_num: int, edge_dir: str,
-                               special_relation_dict: dict, bi_directed: bool = True):
+def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
+                                      hop_num: int, edge_dir: str, special_relation_dict: dict,
+                                      bi_directed: bool = True):
     """
-    :param subgraph:
-    :param parent2sub_dict:
-    :param neighbors_dict:
-    :param special_relation_dict:
-    :param bi_directed:
-    :return: graph augmentation by randomly adding multi-hop edges in graphs
+    :param subgraph: sub-graph with anchor-node
+    :param parent2sub_dict: map parent ids to the sub-graph node ids
+    :param neighbors_dict: multi-hop neighbors to anchor-node
+    :param special_relation_dict: {x_hop_x_r}
+    :param bi_directed: whether bi_directional graph
+    :return: graph augmentation by randomly adding "multi-hop edges" in graphs
     """
     assert edge_dir in {'in', 'out'}
     anchor_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
@@ -257,13 +237,30 @@ def cls_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: 
         node_ids = torch.arange(number_of_nodes - 1)
         self_loop_r = torch.LongTensor(number_of_nodes - 1).fill_(special_relation_dict['loop_r'])
         aug_sub_graph.add_edges(node_ids, node_ids, {'tid': self_loop_r})
+        assert subgraph.number_of_nodes() == aug_sub_graph.number_of_nodes()
         return subgraph, aug_sub_graph
     hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
 
 
 
-
-
+def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, special_entity_dict: dict,
+                                     special_relation_dict: dict):
+    assert edge_dir in {'in', 'out'}
+    view_num = random.randint(1, hop_num)
+    samp_hop_nums = random.choice(np.arange(2, hop_num + 1), size=view_num, replace=False)
+    hop_relations = [(_, '{}_hop_{}_r'.format(edge_dir, _)) for _ in samp_hop_nums if '{}_hop_{}_r'.format(edge_dir, _)
+                     in special_relation_dict]
+    assert len(hop_relations) > 0
+    aug_sub_graph = copy.deepcopy(subgraph)
+    for hop_num, hop_relation in hop_relations:
+        hop_graph = dgl.khop_graph(g=subgraph, k=hop_num)
+        src_nodes, dst_nodes = hop_graph.edges()
+        relation_tid_i = torch.LongTensor(src_nodes.shape).fill_(special_relation_dict[hop_relation])
+        aug_sub_graph.add_edges(src_nodes, dst_nodes, {'tid': relation_tid_i})
+    cls_parent_node_id = special_entity_dict['cls']
+    aug_sub_graph, _ = sub_graph_cls_addition(subgraph=aug_sub_graph, cls_parent_node_id=cls_parent_node_id,
+                                              special_relation_dict=special_relation_dict)
+    return aug_sub_graph
 
 
 
