@@ -38,6 +38,6 @@ class SubGraphDataset(Dataset):
                                                             special_relation_dict=self.special_relation2id,
                                                             neibor2pathlen_dict=neighbor2pathlen_dict,
                                                             bi_directed=self.bi_directed, debug=False)
-        print(subgraph.ndata['nid'])
-        print(subgraph.ndata['n_order'])
+        # print(subgraph.ndata['nid'])
+        # print(subgraph.ndata['n_order'])
         # print(subgraph.number_of_nodes(), len(neighbor2pathlen_dict))

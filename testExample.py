@@ -14,7 +14,7 @@ from core.utils import seed_everything
 from numpy import random
 seed_everything(seed=45)
 ##++++++++++++++
-kg_name = 'FB15k-237'
+kg_name = 'YAGO3-10'
 fanouts = [10,5,5,5]
 graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
     knowledge_graph_khop_reconstruction(dataset=kg_name, hop_num=5)
@@ -26,7 +26,6 @@ kg_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes, nrelation=num
                                    fanouts=fanouts)
 for _ in tqdm(range(kg_dataset.len)):
     kg_dataset.__getitem__(_)
-    break
 print('Run time = {:.4f}'.format(time() - start_time))
 ##++++++++++++++
 # citation_data_name = 'cora'
