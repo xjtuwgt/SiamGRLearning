@@ -26,6 +26,7 @@ kg_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes, nrelation=num
                                    fanouts=fanouts)
 for _ in tqdm(range(kg_dataset.len)):
     kg_dataset.__getitem__(_)
+    break
 print('Run time = {:.4f}'.format(time() - start_time))
 ##++++++++++++++
 # citation_data_name = 'cora'
@@ -53,6 +54,12 @@ print('Run time = {:.4f}'.format(time() - start_time))
 # src_ids = torch.tensor([0, 1, 2, 3, 1, 2])
 # dst_ids = torch.tensor([0, 1, 2, 3, 2, 1])
 # graph = dgl.graph((src_ids, dst_ids), num_nodes=5)
+#
+# graph = dgl.graph(([], []), num_nodes=5)
+# x, y = graph.edges()
+#
+# z = torch.unique(x, return_counts=True)
+# print(z[0].tolist())
 #
 # cls_nodes = torch.tensor([4] * 4, dtype=torch.long)
 # node_ids = torch.arange(4)

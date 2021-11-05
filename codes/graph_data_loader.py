@@ -30,10 +30,14 @@ class SubGraphDataset(Dataset):
         samp_hop_num = random.randint(2, self.hop_num+1)
         samp_fanouts = self.fanouts[:samp_hop_num]
         cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])
-        neighbors_dict, edge_dict = sub_graph_neighbor_sample(graph=self.g, anchor_node_ids=anchor_node_ids,
+        neighbors_dict, neighbor2pathlen_dict, edge_dict = sub_graph_neighbor_sample(graph=self.g, anchor_node_ids=anchor_node_ids,
                                                              cls_node_ids=cls_node_ids, fanouts=samp_fanouts,
                                                              edge_dir=self.edge_dir, debug=False)
         subgraph, parent2sub_dict = cls_sub_graph_extractor(graph=self.g, edge_dict=edge_dict,
                                                             neighbors_dict=neighbors_dict,
                                                             special_relation_dict=self.special_relation2id,
+                                                            neibor2pathlen_dict=neighbor2pathlen_dict,
                                                             bi_directed=self.bi_directed, debug=False)
+        print(subgraph.ndata['nid'])
+        print(subgraph.ndata['n_order'])
+        # print(subgraph.number_of_nodes(), len(neighbor2pathlen_dict))

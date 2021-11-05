@@ -82,7 +82,15 @@ def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tens
     if debug:
         print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
     neighbors_dict = dict([(k, torch.unique(v, return_counts=True)) for k, v in neighbors_dict.items()])
-    return neighbors_dict, edge_dict
+    ##############################################################################################
+    neighbor2pathlen_dict = {anchor_node_ids[0].data.item(): 1, cls_node_ids[0].data.item(): 0}
+    for hop in range(1, hop_number + 1):
+        hop_neighbors = neighbors_dict['{}_hop_{}'.format(edge_dir, hop)]
+        for neighbor in hop_neighbors[0].tolist():
+            if neighbor not in neighbor2pathlen_dict:
+                neighbor2pathlen_dict[neighbor] = hop + 1
+    ##############################################################################################
+    return neighbors_dict, neighbor2pathlen_dict, edge_dict
 
 def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list,
                      edge_dir: str = 'in', debug=False):
@@ -125,10 +133,18 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
     eid_list, tid_list = edge_ids.tolist(), edge_tids.tolist()
     for _, eid in enumerate(eid_list):
         edge_dict[eid] = (src_node_list[_], tid_list[_], dst_node_list[_])
+    ##############################################################################################
+    neighbor_node2pathlen_dict = {anchor_node_ids[0].data.item(): 1, cls_node_ids[0].data.item(): 0}
+    for hop in range(1, walk_length):
+        hop_neighbors = neighbors_dict['{}_hop_{}'.format(edge_dir, hop)]
+        for neighbor in hop_neighbors[0].tolist():
+            if neighbor not in neighbor_node2pathlen_dict:
+                neighbor_node2pathlen_dict[neighbor] = hop + 1
+    ##############################################################################################
     end_time = time() if debug else 0
     if debug:
         print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
-    return neighbors_dict, edge_dict
+    return neighbors_dict, neighbor_node2pathlen_dict, edge_dict
 
 def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directed:bool = True):
     """
@@ -173,7 +189,7 @@ def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_d
     """
     assert 'cls_r' in special_relation_dict
     subgraph.add_nodes(1) ## the last node is the cls_node
-    subgraph.ndata['nid'][-1] = cls_parent_node_id
+    subgraph.ndata['nid'][-1] = cls_parent_node_id ## set the nid (parent node id) in sub-graph
     parent_node_ids, sub_node_ids = subgraph.ndata['nid'].tolist(), subgraph.nodes().tolist()
     parent2sub_dict = dict(zip(parent_node_ids, sub_node_ids))
     cls_idx = parent2sub_dict[cls_parent_node_id]
@@ -189,7 +205,7 @@ def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_d
     return subgraph, parent2sub_dict
 
 def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
-                            bi_directed: bool = True, debug=False):
+                            neibor2pathlen_dict: dict, bi_directed: bool = True, debug=False):
     """
     extract the sub-graph according to edge_dict and then add cls_node as super node
     :param graph: original large graph
@@ -206,6 +222,9 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     cls_parent_node_id = neighbors_dict['cls'][0][0].data.item()
     subgraph, parent2sub_dict = sub_graph_cls_addition(subgraph=subgraph, cls_parent_node_id=cls_parent_node_id,
                                                        special_relation_dict=special_relation_dict)
+    assert len(parent2sub_dict) == len(neibor2pathlen_dict) and len(parent2sub_dict) == subgraph.number_of_nodes()
+    node_orders = [neibor2pathlen_dict[key] for key, value in parent2sub_dict.items()]
+    subgraph.ndata['n_order'] = torch.as_tensor(node_orders, dtype=torch.long)
     end_time = time() if debug else 0
     if debug:
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
