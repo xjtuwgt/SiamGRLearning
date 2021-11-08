@@ -42,7 +42,7 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
 def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     """
     :param graph:
-    :param edge_type_ids: add 'tid' to graph edge data
+    :param edge_type_ids: add 'tid' to graph edge data --> type id
     :return:
     """
     graph.edata['tid'] = edge_type_ids

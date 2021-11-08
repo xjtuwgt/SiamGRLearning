@@ -28,22 +28,22 @@ seed_everything(seed=45)
 #     kg_dataset.__getitem__(_)
 # print('Run time = {:.4f}'.format(time() - start_time))
 ##++++++++++++++
-citation_data_name = 'cora'
-graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
-    citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=6)
-print(special_relation_dict)
-print((graph.in_degrees() == 0).sum())
-start_time = time()
-# fanouts = [10,5,5,5,5]
-fanouts = [-1,-1,-1,-1]
-citation_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes,
-                                   nrelation=number_of_relations,
-                                   special_entity2id=special_entity_dict,
-                                   special_relation2id=special_relation_dict,
-                                   fanouts=fanouts)
-for _ in tqdm(range(citation_dataset.len)):
-    citation_dataset.__getitem__(_)
-print('Run time = {:.4f}'.format(time() - start_time))
+# citation_data_name = 'cora'
+# graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+#     citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=6)
+# print(special_relation_dict)
+# print((graph.in_degrees() == 0).sum())
+# start_time = time()
+# # fanouts = [10,5,5,5,5]
+# fanouts = [-1,-1,-1,-1]
+# citation_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes,
+#                                    nrelation=number_of_relations,
+#                                    special_entity2id=special_entity_dict,
+#                                    special_relation2id=special_relation_dict,
+#                                    fanouts=fanouts)
+# for _ in tqdm(range(citation_dataset.len)):
+#     citation_dataset.__getitem__(_)
+# print('Run time = {:.4f}'.format(time() - start_time))
 
 # for _ in range(10):
 #     y = random.choice(np.arange(10), 1)
@@ -121,3 +121,4 @@ print('Run time = {:.4f}'.format(time() - start_time))
 # sg_src, sg_dst = sg.edges()
 # print(sg_src.shape[0])
 # print(sg_dst)
+
