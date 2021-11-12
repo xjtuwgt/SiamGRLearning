@@ -31,8 +31,7 @@ seed_everything(seed=45)
 citation_data_name = 'cora'
 graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
     citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=6)
-print(special_relation_dict)
-print((graph.in_degrees() == 0).sum())
+print('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
 start_time = time()
 fanouts = [10,5,5,5]
 # fanouts = [-1,-1,-1,-1]
@@ -43,5 +42,4 @@ citation_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes,
                                    fanouts=fanouts)
 for _ in tqdm(range(citation_dataset.len)):
     citation_dataset.__getitem__(_)
-    break
 print('Run time = {:.4f}'.format(time() - start_time))

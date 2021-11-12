@@ -2,7 +2,8 @@ from dgl import DGLHeteroGraph
 import torch
 from numpy import random
 from torch.utils.data import Dataset
-from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor
+from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor, \
+    cls_anchor_sub_graph_augmentation
 
 class SubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
@@ -38,8 +39,12 @@ class SubGraphDataset(Dataset):
                                                             special_relation_dict=self.special_relation2id,
                                                             node_arw_label_dict=node_arw_label_dict,
                                                             bi_directed=self.bi_directed, debug=False)
-        print(subgraph.ndata)
-        print(subgraph.edata)
+
+        cls_anchor_sub_graph_augmentation(subgraph=subgraph, parent2sub_dict=parent2sub_dict,
+                                          neighbors_dict=neighbors_dict,
+                                          special_relation_dict=self.special_relation2id)
+        # print(subgraph.ndata)
+        # print(subgraph.edata)
         # print(subgraph.ndata['nid'])
         # print(subgraph.ndata['n_order'])
         # print(subgraph.number_of_nodes(), len(neighbor2pathlen_dict))

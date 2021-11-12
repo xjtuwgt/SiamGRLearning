@@ -236,8 +236,8 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     return subgraph, parent2sub_dict
 
 def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
-                                      hop_num: int, edge_dir: str, special_relation_dict: dict,
-                                      bi_directed: bool = True):
+                                      special_relation_dict: dict, bi_directed: bool = True,
+                                      self_loop: bool = False):
     """
     :param subgraph: sub-graph with anchor-node
     :param parent2sub_dict: map parent ids to the sub-graph node ids
@@ -246,17 +246,12 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
     :param bi_directed: whether bi_directional graph
     :return: graph augmentation by randomly adding "multi-hop edges" in graphs
     """
-    assert edge_dir in {'in', 'out'}
     anchor_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
     anchor_idx = parent2sub_dict[anchor_parent_node_id]
     assert anchor_idx < subgraph.number_of_nodes() - 1
-
-    samp_hop_num = random.randint(2, hop_num + 1)
-    hop_neighbor = '{}_hop_{}'.format(edge_dir, samp_hop_num)
-    hop_relation = '{}_hop_{}_r'.format(edge_dir, samp_hop_num)
-    assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
-    hop_neighbor_ids, hop_neighbor_freq = neighbors_dict[hop_neighbor]
-    if hop_neighbor_ids.shape[0] == 0:
+    filtered_neighbors_dict = dict([(key, value) for key, value in neighbors_dict.items()
+                               if 'hop' in key and value[0].shape[0] > 0 and 'hop_1' not in key])
+    if len(filtered_neighbors_dict) == 0:
         aug_sub_graph = copy.deepcopy(subgraph)
         number_of_nodes = subgraph.number_of_nodes()
         node_ids = torch.arange(number_of_nodes - 1)
@@ -264,6 +259,12 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         aug_sub_graph.add_edges(node_ids, node_ids, {'rid': self_loop_r})
         assert subgraph.number_of_nodes() == aug_sub_graph.number_of_nodes()
         return subgraph, aug_sub_graph
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    hop_neighbors_ = [key for key, value in filtered_neighbors_dict.items()]
+    hop_neighbor = random.choice(hop_neighbors_, 1)[0]
+    hop_relation = '{}_r'.format(hop_neighbor)
+    assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
+    hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
     hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
 
 
