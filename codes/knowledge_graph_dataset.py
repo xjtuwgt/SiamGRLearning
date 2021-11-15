@@ -18,4 +18,5 @@ def knowledge_graph_khop_reconstruction(dataset: str, hop_num=5, bi_directed:boo
     number_of_added_nodes = number_of_nodes - nentities
     print('Added number of nodes = {}'.format(number_of_added_nodes))
     assert len(special_entity_dict) == number_of_added_nodes
+    print('Graph nodes: {}, edges: {}'.format(graph.number_of_nodes(), graph.number_of_edges()))
     return graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
