@@ -43,10 +43,4 @@ class SubGraphDataset(Dataset):
         aug_subgraph = cls_anchor_sub_graph_augmentation(subgraph=subgraph, parent2sub_dict=parent2sub_dict,
                                           neighbors_dict=neighbors_dict, edge_dir=self.edge_dir,
                                           special_relation_dict=self.special_relation2id)
-        # print(subgraph.number_of_nodes())
-        # print(aug_subgraph.number_of_nodes())
-        # print(subgraph.ndata)
-        # print(subgraph.edata)
-        # print(subgraph.ndata['nid'])
-        # print(subgraph.ndata['n_order'])
-        # print(subgraph.number_of_nodes(), len(neighbor2pathlen_dict))
+        return subgraph, aug_subgraph
