@@ -182,6 +182,17 @@ def single_node_graph_extractor(graph, neighbors_dict: dict):
     sub_graph = graph.subgraph(anchor_ids)
     return sub_graph
 
+def add_self_loop_in_graph(graph, self_loop_r: int):
+    """
+    :param graph:
+    :param self_loop_r:
+    :return:
+    """
+    number_of_nodes = graph.number_of_nodes()
+    self_loop_r_array = torch.full((number_of_nodes,), self_loop_r, dtype=torch.long)
+    node_ids = torch.arange(number_of_nodes)
+    graph.add_edges(node_ids, node_ids, {'rid': self_loop_r_array})
+
 def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_dict: dict):
     """
     add one cls node into sub-graph as super-node
@@ -208,7 +219,7 @@ def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_d
     return subgraph, parent2sub_dict
 
 def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
-                            node_arw_label_dict: dict, bi_directed: bool = True, debug=False):
+                            node_arw_label_dict: dict, bi_directed: bool = True, self_loop=False, debug=False):
     """
     extract the sub-graph according to edge_dict and then add cls_node as super node
     :param graph: original large graph
@@ -231,13 +242,15 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
         node_orders[value] = node_arw_label_dict[key]
     subgraph.ndata['n_rw_label'] = node_orders
     end_time = time() if debug else 0
+    if self_loop:
+        add_self_loop_in_graph(graph=graph, self_loop_r=special_relation_dict['loop_r'])
     if debug:
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict
 
 def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
                                       special_relation_dict: dict, edge_dir: str,
-                                      bi_directed: bool = True, self_loop: bool = False):
+                                      bi_directed: bool = True):
     """
     :param subgraph: sub-graph with anchor-node
     :param parent2sub_dict: map parent ids to the sub-graph node ids
@@ -245,7 +258,6 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
     :param special_relation_dict: {x_hop_x_r}
     :param edge_dir: edge direction
     :param bi_directed: whether bi_directional graph
-    :param bi_directed: whether add self-loop
     :return: graph augmentation by randomly adding "multi-hop edges" in graphs
     """
     anchor_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
@@ -257,7 +269,7 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         aug_sub_graph = copy.deepcopy(subgraph)
         number_of_nodes = subgraph.number_of_nodes()
         node_ids = torch.arange(number_of_nodes - 1)
-        self_loop_r = torch.LongTensor(number_of_nodes - 1).fill_(special_relation_dict['loop_r'])
+        self_loop_r = torch.full((number_of_nodes - 1,), special_relation_dict['loop_r'])
         aug_sub_graph.add_edges(node_ids, node_ids, {'rid': self_loop_r})
         assert subgraph.number_of_nodes() == aug_sub_graph.number_of_nodes()
         return aug_sub_graph
@@ -268,19 +280,33 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
     hop_neighbor_names = random.choice(hop_neighbors_, view_num, replace=False)
     # #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     aug_sub_graph = copy.deepcopy(subgraph)
-    anchor_idx = torch.as_tensor([anchor_idx], dtype=torch.long)
     for hop_neighbor in hop_neighbor_names:
         assert edge_dir in hop_neighbor
         relation_idx = special_relation_dict['{}_r'.format(hop_neighbor)]
-        relation_idx = torch.as_tensor([relation_idx], dtype=torch.long)
         hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
-
-        print(anchor_idx)
-        print(relation_idx)
-        print(hop_neighbor_ids)
-
-
-
+        hop_neighbor_ids = torch.as_tensor([parent2sub_dict[_] for _ in hop_neighbor_ids.tolist()], dtype=torch.long)
+        anchor_array = torch.full(hop_neighbor_ids.shape, anchor_idx)
+        relation_array = torch.full(hop_neighbor_ids.shape, relation_idx)
+        if edge_dir == 'in':
+            src_nodes = hop_neighbor_ids
+            dst_nodes = anchor_array
+        else:
+            src_nodes = anchor_array
+            dst_nodes = hop_neighbor_ids
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if bi_directed:
+            if edge_dir == 'in':
+                rev_relation = '{}_r'.format(hop_neighbor.replace('in', 'out'))
+            else:
+                rev_relation = '{}_r'.format(hop_neighbor.replace('out', 'in'))
+            rev_relation_idx = special_relation_dict[rev_relation]
+            rev_relation_array = torch.full(hop_neighbor_ids.shape, rev_relation_idx)
+            aug_sub_graph.add_edges(torch.cat([src_nodes, dst_nodes]),
+                                    torch.cat([dst_nodes, src_nodes]),
+                                    {'rid': torch.cat([relation_array, rev_relation_array])})
+        else:
+            aug_sub_graph.add_edges(src_nodes, dst_nodes, {'rid': relation_array})
+    return aug_sub_graph
 
 def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, special_entity_dict: dict,
                                      special_relation_dict: dict):
@@ -295,6 +321,7 @@ def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, spec
         hop_graph = dgl.khop_graph(g=subgraph, k=hop_num)
         src_nodes, dst_nodes = hop_graph.edges()
         relation_tid_i = torch.LongTensor(src_nodes.shape).fill_(special_relation_dict[hop_relation])
+
         aug_sub_graph.add_edges(src_nodes, dst_nodes, {'rid': relation_tid_i})
     cls_parent_node_id = special_entity_dict['cls']
     aug_sub_graph, _ = sub_graph_cls_addition(subgraph=aug_sub_graph, cls_parent_node_id=cls_parent_node_id,
