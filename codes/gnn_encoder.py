@@ -40,11 +40,11 @@ class GDTEncoder(nn.Module):
         rel_features = self.relation_embed_layer(rel_ids)
         with batch_g.local_scope():
             h = ent_features
-            for l in range(self.num_layers):
+            for l in range(self.config.layers):
                 if l == 0:
-                    h = self.gdt_layers[l](batch_g, h, rel_features)
+                    h = self.graph_encoder[l](batch_g, h, rel_features)
                 else:
-                    h = self.gdt_layers[l](batch_g, h)
+                    h = self.graph_encoder[l](batch_g, h)
             graph_cls_embed = h[batch_cls]
             return graph_cls_embed
 
