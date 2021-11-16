@@ -51,3 +51,9 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
     if debug:
         print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
     return neighbors_dict, neighbor_node2pathlen_dict, edge_dict
+
+    hop_neighbor = random.choice(hop_neighbors_, 1)[0]
+    hop_relation = '{}_r'.format(hop_neighbor)
+    assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
+    hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
+    hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
