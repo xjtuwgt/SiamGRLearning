@@ -4,7 +4,6 @@ from torch import nn
 import sys
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.gnn_encoder import GraphSimSiamEncoder
-
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
                     level=logging.INFO)

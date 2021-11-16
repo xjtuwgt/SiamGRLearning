@@ -1,5 +1,5 @@
 from core.gnn_layers import GDTLayer, RGDTLayer
-from core.siamese_builder import SimSiam
+from core.siamese_network import SimSiam
 from core.layers import EmbeddingLayer
 from torch import nn
 
