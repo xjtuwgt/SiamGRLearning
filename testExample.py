@@ -25,7 +25,10 @@ kg_dataset = SubGraphDataset(graph=graph, nentity=number_of_nodes, nrelation=num
                                    special_relation2id=special_relation_dict,
                                    fanouts=fanouts)
 for _ in tqdm(range(kg_dataset.len)):
-    kg_dataset.__getitem__(_)
+    for i in range(10):
+        kg_dataset.__getitem__(_)
+        print('*' * 10)
+    break
 print('Run time = {:.4f}'.format(time() - start_time))
 ##++++++++++++++
 # citation_data_name = 'cora'

@@ -236,14 +236,16 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     return subgraph, parent2sub_dict
 
 def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
-                                      special_relation_dict: dict, bi_directed: bool = True,
-                                      self_loop: bool = False):
+                                      special_relation_dict: dict, edge_dir: str,
+                                      bi_directed: bool = True, self_loop: bool = False):
     """
     :param subgraph: sub-graph with anchor-node
     :param parent2sub_dict: map parent ids to the sub-graph node ids
     :param neighbors_dict: multi-hop neighbors to anchor-node
     :param special_relation_dict: {x_hop_x_r}
+    :param edge_dir: edge direction
     :param bi_directed: whether bi_directional graph
+    :param bi_directed: whether add self-loop
     :return: graph augmentation by randomly adding "multi-hop edges" in graphs
     """
     anchor_parent_node_id = neighbors_dict['anchor'][0][0].data.item()
@@ -258,20 +260,32 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         self_loop_r = torch.LongTensor(number_of_nodes - 1).fill_(special_relation_dict['loop_r'])
         aug_sub_graph.add_edges(node_ids, node_ids, {'rid': self_loop_r})
         assert subgraph.number_of_nodes() == aug_sub_graph.number_of_nodes()
-        return subgraph, aug_sub_graph
+        return aug_sub_graph
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     hop_neighbors_ = [key for key, value in filtered_neighbors_dict.items()]
-    hop_neighbor = random.choice(hop_neighbors_, 1)[0]
-    hop_relation = '{}_r'.format(hop_neighbor)
-    assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
-    hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
-    hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
+    filtered_neighbor_hop_num = len(hop_neighbors_)
+    view_num = random.randint(1, filtered_neighbor_hop_num + 1)
+    hop_neighbor_names = random.choice(hop_neighbors_, view_num, replace=False)
+    # #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    aug_sub_graph = copy.deepcopy(subgraph)
+    anchor_idx = torch.as_tensor([anchor_idx], dtype=torch.long)
+    for hop_neighbor in hop_neighbor_names:
+        assert edge_dir in hop_neighbor
+        relation_idx = special_relation_dict['{}_r'.format(hop_neighbor)]
+        relation_idx = torch.as_tensor([relation_idx], dtype=torch.long)
+        hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
+
+        print(anchor_idx)
+        print(relation_idx)
+        print(hop_neighbor_ids)
+
+
 
 
 def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, special_entity_dict: dict,
                                      special_relation_dict: dict):
     assert edge_dir in {'in', 'out'}
-    view_num = random.randint(1, hop_num)
+    view_num = random.randint(1, hop_num + 1)
     samp_hop_nums = random.choice(np.arange(2, hop_num + 1), size=view_num, replace=False)
     hop_relations = [(_, '{}_hop_{}_r'.format(edge_dir, _)) for _ in samp_hop_nums if '{}_hop_{}_r'.format(edge_dir, _)
                      in special_relation_dict]
