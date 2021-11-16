@@ -2,7 +2,6 @@ from core.gnn_layers import GDTLayer, RGDTLayer
 from core.siamese_builder import SimSiam
 from core.layers import EmbeddingLayer
 from torch import nn
-import dgl, torch
 
 class GDTEncoder(nn.Module):
     def __init__(self, config):
@@ -33,7 +32,8 @@ class GDTEncoder(nn.Module):
                                                       residual=self.config.residual,
                                                       diff_head_tail=self.config.diff_head_tail,
                                                       ppr_diff=self.config.ppr_diff))
-    def forward(self, batch_g):
+    def forward(self, batch_g_pair):
+        batch_g, batch_cls = batch_g_pair
         ent_ids = batch_g.ndata['nid']
         rel_ids = batch_g.edata['rid']
         ent_features = self.node_embed_layer(ent_ids)
@@ -45,9 +45,7 @@ class GDTEncoder(nn.Module):
                     h = self.gdt_layers[l](batch_g, h, rel_features)
                 else:
                     h = self.gdt_layers[l](batch_g, h)
-            batch_g.ndata['h'] = h
-            unbatched_graphs = dgl.unbatch(batch_g)
-            graph_cls_embed = torch.stack([sub_graph.dstdata['h'][0] for sub_graph in unbatched_graphs], dim=0)
+            graph_cls_embed = h[batch_cls]
             return graph_cls_embed
 
 class GraphSimSiamEncoder(nn.Module):
@@ -60,6 +58,6 @@ class GraphSimSiamEncoder(nn.Module):
                                           base_encoder_out_dim=self.config.hidden_dim,
                                           dim=self.config.siam_dim,
                                           pred_dim=self.config.siam_pred_dim)
-
     def forward(self, batch):
-        return
+        p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'])
+        return p1, p2, z1, z2
