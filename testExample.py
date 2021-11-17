@@ -8,7 +8,8 @@ import dgl
 from core.kg_utils import KGDataset, knowledge_graph_construction_from_triples, kg_data_path_collection
 from core.graph_utils import sub_graph_neighbor_sample, sub_graph_random_walk_sample, cls_sub_graph_extractor
 from codes.citation_graph_data import citation_graph_reconstruction, citation_khop_graph_reconstruction
-from codes.graph_pretrained_dataset import SubGraphDataset, SubGraphPairDataset
+from codes.graph_pretrained_dataset import SubGraphPairDataset
+from codes.graph_train_dataset import SubGraphDataset
 from codes.knowledge_graph_data import knowledge_graph_khop_reconstruction
 from codes.citation_graph_data import citation_subgraph_data_helper
 from core.utils import seed_everything

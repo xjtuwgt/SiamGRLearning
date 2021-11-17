@@ -91,6 +91,8 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
         p1, p2, z1, z2 = graph_encoder.forward(batch)
         loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
+        del batch
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if args.n_gpu > 1:
             loss = loss.mean()
         if args.gradient_accumulation_steps > 1:
@@ -111,3 +113,6 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
                 logging.info('Train model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
                 for key, value in metrics.items():
                     logging.info('Metric {}: {:.5f}'.format(key, value))
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
