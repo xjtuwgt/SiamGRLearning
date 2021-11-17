@@ -76,7 +76,7 @@ training_logs = []
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
                         disable=args.local_rank not in [-1, 0])
-for epoch in pretrain_iterator:
+for epoch_idx, epoch in enumerate(pretrain_iterator):
     epoch_iterator = tqdm(citation_pretrain_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     for step, batch in enumerate(epoch_iterator):
         graph_encoder.train()
@@ -85,9 +85,16 @@ for epoch in pretrain_iterator:
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
         p1, p2, z1, z2 = graph_encoder.forward(batch)
         loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
+        if args.n_gpu > 1:
+            loss = loss.mean()
+        if args.gradient_accumulation_steps > 1:
+            loss = loss / args.gradient_accumulation_steps
         loss.backward()
         torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), args.max_grad_norm)
-        optimizer.step()
-        scheduler.step()  # Update learning rate schedule
-        graph_encoder.zero_grad()
+        training_logs.append({'loss': loss.data.item()})
+        if (step + 1) % args.gradient_accumulation_steps == 0:
+            optimizer.step()
+            scheduler.step()  # Update learning rate schedule
+            graph_encoder.zero_grad()
+
         print(loss)
