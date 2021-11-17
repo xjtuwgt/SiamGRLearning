@@ -8,6 +8,7 @@ import torch.nn.init as INIT
 from core.gnn_layers import small_init_gain
 import logging
 
+
 class citation_data_helper(object):
     def __init__(self, graph, fanouts, number_of_nodes, number_of_relations,
                  special_entity_dict, special_relation_dict, train_batch_size, val_batch_size):
@@ -22,23 +23,22 @@ class citation_data_helper(object):
 
     def data_loader(self, data_type):
         citation_dataset = NodeSubGraphDataset(graph=self.graph, nentity=self.number_of_nodes,
-                                                     nrelation=self.number_of_relations,
-                                                     special_entity2id=self.special_entity_dict,
-                                                     special_relation2id=self.special_relation_dict,
-                                                     data_type=data_type,
-                                                     fanouts=self.fanouts)
+                                               nrelation=self.number_of_relations,
+                                               special_entity2id=self.special_entity_dict,
+                                               special_relation2id=self.special_relation_dict,
+                                               data_type=data_type,
+                                               fanouts=self.fanouts)
         if data_type in {'train'}:
             batch_size = self.train_batch_size
             shuffle = True
         else:
             batch_size = self.val_batch_size
             shuffle = False
-        citation_dataloader = DataLoader(dataset=citation_dataset,
-                                               batch_size=batch_size,
-                                               shuffle=shuffle,
-                                               pin_memory=True,
-                                               collate_fn=NodeSubGraphDataset.collate_fn)
+        citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=batch_size,
+                                         shuffle=shuffle, pin_memory=True,
+                                         collate_fn=NodeSubGraphDataset.collate_fn)
         return citation_dataloader
+
 
 def citation_graph_reconstruction(dataset: str):
     if dataset == 'cora':
@@ -59,12 +59,14 @@ def citation_graph_reconstruction(dataset: str):
     nentities, nrelations = graph.number_of_nodes(), 1
     return graph, node_features, nentities, nrelations, n_classes, n_feats
 
+
 def citation_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     print('Bi-directional homogeneous graph: {}'.format(dataset))
     graph, node_features, nentities, nrelations, n_classes, n_feats = citation_graph_reconstruction(dataset=dataset)
     graph, number_of_nodes, number_of_relations, \
     special_entity_dict, special_relation_dict = construct_special_graph_dictionary(graph=graph, n_entities=nentities,
-                                       n_relations=nrelations, hop_num=hop_num)
+                                                                                    n_relations=nrelations,
+                                                                                    hop_num=hop_num)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     graph.ndata['label'][-2:] = -1
     graph.ndata['val_mask'][-2:] = False
@@ -84,6 +86,7 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     graph.ndata.update({'nid': torch.arange(0, number_of_nodes, dtype=torch.long)})
     return graph, node_features, number_of_nodes, number_of_relations, \
            special_entity_dict, special_relation_dict, n_classes, n_feats
+
 
 def citation_subgraph_pair_dataset(args):
     graph, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
