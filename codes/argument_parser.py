@@ -115,11 +115,11 @@ def default_parser():
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     # learning and log ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--seed', type=int, default=42, help="random seed for initialization")
-    parser.add_argument("--num_pretrain_epochs", default=20.0, type=float,
+    parser.add_argument("--num_pretrain_epochs", default=5.0, type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
-    parser.add_argument("--learning_rate", default=5e-4, type=float,
+    parser.add_argument("--learning_rate", default=1e-4, type=float,
                         help="The initial learning rate for Adam.")
     parser.add_argument("--weight_decay", default=0.0, type=float,
                         help="Weight deay if we apply some.")
@@ -131,7 +131,7 @@ def default_parser():
                         help="If > 0: set total number of training steps to perform. Override num_train_epochs.")
     parser.add_argument("--warmup_steps", default=0, type=int,
                         help="Linear warmup over warmup_steps.")
-    parser.add_argument('--logging_steps', type=int, default=10,
+    parser.add_argument('--logging_steps', type=int, default=5,
                         help="Log every X updates steps.")
     parser.add_argument('--eval_interval_ratio', type=float, default=0.25,
                         help="evaluate every X updates steps.")

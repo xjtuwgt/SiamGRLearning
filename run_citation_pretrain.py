@@ -97,7 +97,7 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
             loss = loss / args.gradient_accumulation_steps
         loss.backward()
         torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), args.max_grad_norm)
-        training_logs.append({'loss': loss.data.item()})
+        training_logs.append({'Train_loss': loss.data.item()})
         if (step + 1) % args.gradient_accumulation_steps == 0:
             optimizer.step()
             scheduler.step()  # Update learning rate schedule
@@ -108,6 +108,6 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
                 for metric in training_logs[0].keys():
                     metrics[metric] = sum([log[metric] for log in training_logs])/len(training_logs)
                 training_logs = []
-                logging.info('Train model evaluation at step_{}/epoch_{}'.format(global_step + 1, epoch + 1))
+                logging.info('Train model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
                 for key, value in metrics.items():
                     logging.info('Metric {}: {:.5f}'.format(key, value))
