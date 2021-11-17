@@ -14,10 +14,17 @@ class NodeSubGraphDataset(Dataset):
         self.hop_num = len(fanouts)
         self.g = graph
         #####################
-        if len(special_entity2id) > 0:
-            self.len = graph.number_of_nodes() - len(special_entity2id) ## no need to extract sub-graph of special entities
+        if data_type == 'train':
+            data_mask = self.g.ndata['train_mask']
+        elif data_type == 'validation':
+            data_mask = self.g.ndata['val_mask']
+        elif data_type == 'test':
+            data_mask = self.g.ndata['test_mask']
         else:
-            self.len = graph.number_of_nodes()
+            raise 'Data type = {} is not supported'.format(data_type)
+        self.len = data_mask.int().sum().item()
+        assert self.len > 0
+        self.data_node_ids = data_mask.nonzero().queeze()
         #####################
         self.nentity, self.nrelation = nentity, nrelation
         self.bi_directed = bi_directed
@@ -28,7 +35,8 @@ class NodeSubGraphDataset(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        anchor_node_ids = torch.LongTensor([idx])
+        node_idx = self.data_node_ids[idx]
+        anchor_node_ids = torch.LongTensor([node_idx])
         samp_hop_num = random.randint(2, self.hop_num+1)
         samp_fanouts = self.fanouts[:samp_hop_num]
         cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])

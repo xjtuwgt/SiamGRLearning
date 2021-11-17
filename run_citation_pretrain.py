@@ -4,7 +4,7 @@ from torch import nn
 from tqdm import tqdm
 import sys
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
-from codes.citation_graph_data import citation_subgraph_pair_train_dataloader
+from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
 from codes.gnn_encoder import GraphSimSiamEncoder
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -31,8 +31,7 @@ for key, value in vars(args).items():
     logger.info('Hype-parameter\t{} = {}'.format(key, value))
 logging.info('*' * 75)
 #########################################################################
-citation_train_dataloader = citation_subgraph_pair_train_dataloader(args=args)
-#########################################################################
+citation_pretrain_dataloader, node_features, n_classes = citation_subgraph_pretrain_dataloader(args=args)
 #########################################################################
 for key, value in vars(args).items():
     if 'number' in key or 'emb_dim' in key:
@@ -40,6 +39,7 @@ for key, value in vars(args).items():
 logging.info('*' * 75)
 #########################################################################
 graph_encoder = GraphSimSiamEncoder(config=args)
+graph_encoder.init(graph_node_emb=node_features)
 graph_encoder.to(args.device)
 # #########################################################################
 # # Show model information
@@ -51,8 +51,8 @@ logging.info('*' * 75)
 # #########################################################################
 loss_function = nn.CosineSimilarity(dim=1)
 # #########################################################################
-for batch_idx, batch in tqdm(enumerate(citation_train_dataloader)):
+for batch_idx, batch in tqdm(enumerate(citation_pretrain_dataloader)):
     p1, p2, z1, z2 = graph_encoder.forward(batch)
-    print(p1)
-    print(z1)
+    print(p1.shape)
+    print(z1.shape)
     break

@@ -1,7 +1,9 @@
 from core.gnn_layers import GDTLayer, RGDTLayer
+from torch import Tensor
 from core.siamese_network import SimSiam
 from core.layers import EmbeddingLayer
 from torch import nn
+import logging
 
 class GDTEncoder(nn.Module):
     def __init__(self, config):
@@ -32,6 +34,18 @@ class GDTEncoder(nn.Module):
                                                       residual=self.config.residual,
                                                       diff_head_tail=self.config.diff_head_tail,
                                                       ppr_diff=self.config.ppr_diff))
+    def init(self, graph_node_emb: Tensor=None, graph_rel_emb: Tensor=None, freeze=False):
+        if graph_node_emb is not None:
+            self.node_embed_layer.init_with_tensor(data=graph_node_emb, freeze=freeze)
+            logging.info('Initializing node features with pretrained embeddings')
+        else:
+            self.node_embed_layer.init()
+        if graph_rel_emb is not None:
+            self.relation_embed_layer.init_with_tensor(data=graph_rel_emb, freeze=freeze)
+            logging.info('Initializing relation embedding with pretrained embeddings')
+        else:
+            self.relation_embed_layer.init()
+
     def forward(self, batch_g_pair):
         batch_g, batch_cls = batch_g_pair
         ent_ids = batch_g.ndata['nid']
@@ -58,6 +72,10 @@ class GraphSimSiamEncoder(nn.Module):
                                           base_encoder_out_dim=self.config.hidden_dim,
                                           dim=self.config.siam_dim,
                                           pred_dim=self.config.siam_pred_dim)
+
+    def init(self, graph_node_emb: Tensor=None, graph_rel_emb: Tensor=None, freeze=False):
+        self.graph_encoder.init(graph_node_emb=graph_node_emb, graph_rel_emb=graph_rel_emb, freeze=freeze)
+
     def forward(self, batch):
         p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'])
         return p1, p2, z1, z2

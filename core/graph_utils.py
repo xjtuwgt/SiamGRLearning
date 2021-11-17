@@ -25,11 +25,6 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
     special_entity_dict['mask'] = number_nodes + 1 ## for node mask
     graph.add_nodes(2) ### add such 'cls' token as a new mask entity++++ adding two more nodes
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    graph.ndata['label'][-2:] = -1
-    graph.ndata['val_mask'][-2:] = False
-    graph.ndata['train_mask'][-2:] = False
-    graph.ndata['test_mask'][-2:] = False
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     for hop in range(hop_num):
         special_relation_dict['in_hop_{}_r'.format(hop + 1)] = n_relations + (2 * hop)
         special_relation_dict['out_hop_{}_r'.format(hop + 1)] = n_relations + (2 * hop + 1)
