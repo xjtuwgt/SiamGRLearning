@@ -1,7 +1,7 @@
 import logging
 import torch
 from torch import nn
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import sys
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
@@ -51,7 +51,7 @@ graph_encoder = GraphSimSiamEncoder(config=args)
 graph_encoder.init(graph_node_emb=node_features)
 graph_encoder.to(args.device)
 # #########################################################################
-# # Show model information
+# # Print model information
 # #########################################################################
 logging.info('Model Parameter Configuration:')
 for name, param in graph_encoder.named_parameters():
@@ -60,9 +60,20 @@ logging.info('*' * 75)
 # #########################################################################
 criterion = nn.CosineSimilarity(dim=1)
 # #########################################################################
-for batch_idx, batch in tqdm(enumerate(citation_pretrain_dataloader)):
-    p1, p2, z1, z2 = graph_encoder.forward(batch)
-    loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
-    print(p1.shape)
-    print(z1.shape)
-    print(loss)
+start_epoch = 0
+best_accuracy = 0.0
+best_model_name = None
+training_logs = []
+##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+train_iterator = trange(start_epoch, start_epoch+int(args.num_train_epochs), desc="Epoch",
+                        disable=args.local_rank not in [-1, 0])
+for epoch in train_iterator:
+    epoch_iterator = tqdm(citation_pretrain_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
+    for step, batch in enumerate(epoch_iterator):
+        graph_encoder.train()
+        #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        for key, value in batch.items():
+            batch[key] = (value[0].to(args.device), value[1].to(args.device))
+        p1, p2, z1, z2 = graph_encoder.forward(batch)
+        loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
+        print(loss)
