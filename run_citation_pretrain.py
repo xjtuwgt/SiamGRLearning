@@ -60,7 +60,7 @@ if args.total_pretrain_steps > 0:
 else:
     t_total_steps = len(citation_pretrain_dataloader) // args.gradient_accumulation_steps \
                     * args.num_pretrain_epochs
-optimizer, scheduler = graph_encoder.optimizer_scheduler(total_steps=t_total_steps)
+optimizer, scheduler = graph_encoder.pretrain_optimizer_scheduler(total_steps=t_total_steps)
 # #########################################################################
 logging.info('Model Parameter Configuration:')
 for name, param in graph_encoder.named_parameters():
@@ -85,4 +85,9 @@ for epoch in pretrain_iterator:
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
         p1, p2, z1, z2 = graph_encoder.forward(batch)
         loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), args.max_grad_norm)
+        optimizer.step()
+        scheduler.step()  # Update learning rate schedule
+        graph_encoder.zero_grad()
         print(loss)
