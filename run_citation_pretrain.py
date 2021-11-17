@@ -79,14 +79,15 @@ start_epoch = 0
 best_accuracy = 0.0
 best_model_name = None
 training_logs = []
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+logging.info('Staring Pretraining over graph = {}'.format(args.citation_name))
 pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
-                        disable=args.local_rank not in [-1, 0])
+                           disable=args.local_rank not in [-1, 0])
 for epoch_idx, epoch in enumerate(pretrain_iterator):
     epoch_iterator = tqdm(citation_pretrain_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     for step, batch in enumerate(epoch_iterator):
         graph_encoder.train()
-        #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         for key, value in batch.items():
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
         p1, p2, z1, z2 = graph_encoder.forward(batch)
@@ -110,7 +111,7 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
                 for metric in training_logs[0].keys():
                     metrics[metric] = sum([log[metric] for log in training_logs])/len(training_logs)
                 training_logs = []
-                logging.info('Train model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
+                logging.info('Pre-trained model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
                 for key, value in metrics.items():
                     logging.info('Metric {}: {:.5f}'.format(key, value))
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

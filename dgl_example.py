@@ -36,8 +36,8 @@ with open(temp_file_name) as file:
             # print(metric)
 x = (np.arange(len(train_loss_list)) + 1) * 5
 train_loss = np.array(train_loss_list)
-for _ in train_loss:
-    print(_)
+# for _ in train_loss:
+#     print(_)
 # print(train_loss)
-# plt.plot(x, train_loss)
-# plt.show()
+plt.plot(x, train_loss)
+plt.show()
