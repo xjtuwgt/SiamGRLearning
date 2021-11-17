@@ -4,7 +4,6 @@ import dgl
 from numpy import random
 from torch.utils.data import Dataset
 from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor
-
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class NodeSubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,

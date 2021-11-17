@@ -35,7 +35,7 @@ citation_train_dataloader = citation_subgraph_pair_train_dataloader(args=args)
 #########################################################################
 #########################################################################
 for key, value in vars(args).items():
-    if 'number' in key:
+    if 'number' in key or 'emb_dim' in key:
         logger.info('Hype-parameter\t{} = {}'.format(key, value))
 logging.info('*' * 75)
 #########################################################################

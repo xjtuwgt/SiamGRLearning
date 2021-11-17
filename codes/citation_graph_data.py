@@ -52,6 +52,8 @@ def citation_subgraph_pair_dataset(args):
         citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
     logging.info('Number of nodes = {}'.format(number_of_nodes))
     args.node_number = number_of_nodes
+    logging.info('Node features = {}'.format(n_feats))
+    args.node_emb_dim = n_feats
     logging.info('Number of relations = {}'.format(number_of_relations))
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
@@ -69,6 +71,8 @@ def citation_subgraph_dataset(args):
         citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
     logging.info('Number of nodes = {}'.format(number_of_nodes))
     args.node_number = number_of_nodes
+    logging.info('Node features = {}'.format(n_feats))
+    args.node_emb_dim = n_feats
     logging.info('Number of relations = {}'.format(number_of_relations))
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
@@ -81,7 +85,7 @@ def citation_subgraph_dataset(args):
     return citation_dataset, node_features, n_classes
 
 def citation_subgraph_pair_train_dataloader(args):
-    citation_dataset = citation_subgraph_pair_dataset(args=args)
+    citation_dataset, node_features, n_classes = citation_subgraph_pair_dataset(args=args)
     citation_dataloader = DataLoader(dataset=citation_dataset,
                                      batch_size=args.per_gpu_train_batch_size,
                                      shuffle=True,
@@ -91,7 +95,7 @@ def citation_subgraph_pair_train_dataloader(args):
     return citation_dataloader
 
 def citation_subgraph_train_dataloader(args):
-    citation_dataset = citation_subgraph_dataset(args=args)
+    citation_dataset, node_features, n_classes = citation_subgraph_dataset(args=args)
     citation_dataloader = DataLoader(dataset=citation_dataset,
                                      batch_size=args.per_gpu_train_batch_size,
                                      shuffle=True,
