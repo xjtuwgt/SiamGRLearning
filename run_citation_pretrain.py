@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from tqdm import tqdm, trange
 import sys
+from tensorboardX import SummaryWriter
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
 from codes.citation_graph_data import citation_subgraph_data_helper
@@ -62,6 +63,11 @@ else:
                     * args.num_pretrain_epochs
 optimizer, scheduler = graph_encoder.pretrain_optimizer_scheduler(total_steps=t_total_steps)
 # #########################################################################
+global_step = 0
+if args.local_rank in [-1, 0]:
+    tb_writer = SummaryWriter(args.exp_name)
+graph_encoder.zero_grad()
+# #########################################################################
 logging.info('Model Parameter Configuration:')
 for name, param in graph_encoder.named_parameters():
     logging.info('Parameter {}: {}, require_grad = {}'.format(name, str(param.size()), str(param.requires_grad)))
@@ -96,5 +102,12 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
             optimizer.step()
             scheduler.step()  # Update learning rate schedule
             graph_encoder.zero_grad()
-
-        print(loss)
+            global_step += 1
+            if args.local_rank in [-1, 0] and args.logging_steps > 0 and global_step % args.logging_steps == 0:
+                metrics = {}
+                for metric in training_logs[0].keys():
+                    metrics[metric] = sum([log[metric] for log in training_logs])/len(training_logs)
+                training_logs = []
+                logging.info('Train model evaluation at step_{}/epoch_{}'.format(global_step + 1, epoch + 1))
+                for key, value in metrics.items():
+                    logging.info('Metric {}: {:.5f}'.format(key, value))
