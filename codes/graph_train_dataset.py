@@ -24,7 +24,7 @@ class NodeSubGraphDataset(Dataset):
             raise 'Data type = {} is not supported'.format(data_type)
         self.len = data_mask.int().sum().item()
         assert self.len > 0
-        self.data_node_ids = data_mask.nonzero().queeze()
+        self.data_node_ids = data_mask.nonzero().squeeze()
         #####################
         self.nentity, self.nrelation = nentity, nrelation
         self.bi_directed = bi_directed

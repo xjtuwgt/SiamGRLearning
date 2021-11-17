@@ -10,6 +10,7 @@ from core.graph_utils import sub_graph_neighbor_sample, sub_graph_random_walk_sa
 from codes.citation_graph_data import citation_graph_reconstruction, citation_khop_graph_reconstruction
 from codes.graph_pretrained_dataset import SubGraphDataset, SubGraphPairDataset
 from codes.knowledge_graph_data import knowledge_graph_khop_reconstruction
+from codes.citation_graph_data import citation_subgraph_data_helper
 from core.utils import seed_everything
 from torch.utils.data import DataLoader
 from numpy import random

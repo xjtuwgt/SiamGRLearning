@@ -8,6 +8,38 @@ import torch.nn.init as INIT
 from core.gnn_layers import small_init_gain
 import logging
 
+class citation_data_helper(object):
+    def __init__(self, graph, fanouts, number_of_nodes, number_of_relations,
+                 special_entity_dict, special_relation_dict, train_batch_size, val_batch_size):
+        self.graph = graph
+        self.fanouts = fanouts
+        self.number_of_nodes = number_of_nodes
+        self.number_of_relations = number_of_relations
+        self.special_entity_dict = special_entity_dict
+        self.special_relation_dict = special_relation_dict
+        self.train_batch_size = train_batch_size
+        self.val_batch_size = val_batch_size
+
+    def data_loader(self, data_type):
+        citation_dataset = NodeSubGraphDataset(graph=self.graph, nentity=self.number_of_nodes,
+                                                     nrelation=self.number_of_relations,
+                                                     special_entity2id=self.special_entity_dict,
+                                                     special_relation2id=self.special_relation_dict,
+                                                     data_type=data_type,
+                                                     fanouts=self.fanouts)
+        if data_type in {'train'}:
+            batch_size = self.train_batch_size
+            shuffle = True
+        else:
+            batch_size = self.val_batch_size
+            shuffle = False
+        citation_dataloader = DataLoader(dataset=citation_dataset,
+                                               batch_size=batch_size,
+                                               shuffle=shuffle,
+                                               pin_memory=True,
+                                               collate_fn=NodeSubGraphDataset.collate_fn)
+        return citation_dataloader
+
 def citation_graph_reconstruction(dataset: str):
     if dataset == 'cora':
         data = CoraGraphDataset()
@@ -72,37 +104,6 @@ def citation_subgraph_pair_dataset(args):
                                            fanouts=fanouts)
     return citation_dataset, node_features, n_classes
 
-class citation_data_helper(object):
-    def __init__(self, graph, fanouts, number_of_nodes, number_of_relations,
-                 special_entity_dict, special_relation_dict, train_batch_size, val_batch_size):
-        self.graph = graph
-        self.fanouts = fanouts
-        self.number_of_nodes = number_of_nodes
-        self.number_of_relations = number_of_relations
-        self.special_entity_dict = special_entity_dict
-        self.special_relation_dict = special_relation_dict
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-
-    def data_loader(self, data_type):
-        citation_dataset = NodeSubGraphDataset(graph=self.graph, nentity=self.number_of_nodes,
-                                                     nrelation=self.number_of_relations,
-                                                     special_entity2id=self.special_entity_dict,
-                                                     special_relation2id=self.special_relation_dict,
-                                                     data_type=data_type,
-                                                     fanouts=self.fanouts)
-        if data_type in {'train'}:
-            batch_size = self.train_batch_size
-            shuffle = True
-        else:
-            batch_size = self.val_batch_size
-            shuffle = False
-        citation_dataloader = DataLoader(dataset=citation_dataset,
-                                               batch_size=batch_size,
-                                               shuffle=shuffle,
-                                               pin_memory=True,
-                                               collate_fn=NodeSubGraphDataset.collate_fn)
-        return citation_dataloader
 
 def citation_subgraph_data_helper(args):
     graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
