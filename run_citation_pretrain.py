@@ -53,6 +53,15 @@ graph_encoder.to(args.device)
 # #########################################################################
 # # Print model information
 # #########################################################################
+if args.total_pretrain_steps > 0:
+    t_total_steps = args.total_pretrain_steps
+    args.num_pretrain_epochs = args.total_pretrain_steps // (len(citation_pretrain_dataloader)
+                                                             // args.gradient_accumulation_steps) + 1
+else:
+    t_total_steps = len(citation_pretrain_dataloader) // args.gradient_accumulation_steps \
+                    * args.num_pretrain_epochs
+optimizer, scheduler = graph_encoder.optimizer_scheduler(total_steps=t_total_steps)
+# #########################################################################
 logging.info('Model Parameter Configuration:')
 for name, param in graph_encoder.named_parameters():
     logging.info('Parameter {}: {}, require_grad = {}'.format(name, str(param.size()), str(param.requires_grad)))
@@ -65,9 +74,9 @@ best_accuracy = 0.0
 best_model_name = None
 training_logs = []
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-train_iterator = trange(start_epoch, start_epoch+int(args.num_train_epochs), desc="Epoch",
+pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
                         disable=args.local_rank not in [-1, 0])
-for epoch in train_iterator:
+for epoch in pretrain_iterator:
     epoch_iterator = tqdm(citation_pretrain_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     for step, batch in enumerate(epoch_iterator):
         graph_encoder.train()
@@ -75,5 +84,5 @@ for epoch in train_iterator:
         for key, value in batch.items():
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
         p1, p2, z1, z2 = graph_encoder.forward(batch)
-        loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
+        loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
         print(loss)

@@ -3,6 +3,8 @@ from torch import Tensor
 from core.siamese_network import SimSiam
 from core.layers import EmbeddingLayer
 from torch import nn
+from transformers import AdamW, get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, \
+    get_cosine_with_hard_restarts_schedule_with_warmup
 import logging
 
 class GDTEncoder(nn.Module):
@@ -79,3 +81,23 @@ class GraphSimSiamEncoder(nn.Module):
     def forward(self, batch):
         p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'])
         return p1, p2, z1, z2
+
+    def optimizer_scheduler(self, total_steps):
+        "Prepare optimizer and schedule (linear warmup and decay)"
+        optimization_params = self.parameters()
+        optimizer = AdamW(optimization_params, lr=self.config.learning_rate, eps=self.config.adam_epsilon)
+        if self.config.lr_scheduler == 'linear':
+            scheduler = get_linear_schedule_with_warmup(optimizer,
+                                                        num_warmup_steps=self.config.warmup_steps,
+                                                        num_training_steps=total_steps)
+        elif self.config.lr_scheduler == 'cosine':
+            scheduler = get_cosine_schedule_with_warmup(optimizer=optimizer,
+                                                        num_warmup_steps=self.config.warmup_steps,
+                                                        num_training_steps=total_steps)
+        elif self.config.lr_scheduler == 'cosine_restart':
+            scheduler = get_cosine_with_hard_restarts_schedule_with_warmup(optimizer=optimizer,
+                                                                           num_warmup_steps=self.config.warmup_steps,
+                                                                           num_training_steps=total_steps)
+        else:
+            raise '{} is not supported'.format(self.config.lr_scheduler)
+        return optimizer, scheduler
