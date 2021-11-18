@@ -47,5 +47,4 @@ class SimSiam(nn.Module):
 
     def encode(self, x):
         z = self.encoder(x)
-        p = self.predictor(z)
-        return p
+        return z
