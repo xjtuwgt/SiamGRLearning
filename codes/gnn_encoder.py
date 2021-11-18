@@ -56,6 +56,8 @@ class GDTEncoder(nn.Module):
             logging.info('Initializing relation embedding with pretrained embeddings')
         else:
             self.relation_embed_layer.init()
+        if self.config.arw_position:
+            self.arw_position_embed_layer.init()
 
     def forward(self, batch_g_pair):
         batch_g, batch_cls = batch_g_pair
