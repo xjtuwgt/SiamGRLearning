@@ -52,7 +52,7 @@ class SubGraphDataset(Dataset):
         return {'batch_graph': (batch_graphs, batch_graph_cls)}
 
 
-def citation_train_valid_test(graph, data_type):
+def citation_train_valid_test(graph, data_type: str):
     if data_type == 'train':
         data_mask = graph.ndata['train_mask']
     elif data_type == 'valid':
@@ -61,20 +61,20 @@ def citation_train_valid_test(graph, data_type):
         data_mask = graph.ndata['test_mask']
     else:
         raise 'Data type = {} is not supported'.format(data_type)
-    len = data_mask.int().sum().item()
+    data_len = data_mask.int().sum().item()
     data_node_ids = data_mask.nonzero().squeeze()
-    return len, data_node_ids
+    return data_len, data_node_ids
 
 
-def ogb_train_valid_test(node_split_idx, data_type):
+def ogb_train_valid_test(node_split_idx: dict, data_type: str):
     data_node_ids = node_split_idx[data_type]
-    len = data_node_ids.shape[0]
-    return len, data_node_ids
+    data_len = data_node_ids.shape[0]
+    return data_len, data_node_ids
 
 
 class NodeSubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
-                 special_entity2id: dict, special_relation2id: dict, data_type: str, graph_type:str,
+                 special_entity2id: dict, special_relation2id: dict, data_type: str, graph_type: str,
                  bi_directed=True, edge_dir='in', node_split_idx: dict = None):
         assert len(fanouts) > 0 and (data_type in {'train', 'valid', 'test'})
         assert graph_type in {'citation', 'ogb'}
@@ -124,7 +124,6 @@ class NodeSubGraphDataset(Dataset):
         return {'batch_graph': (batch_graphs, batch_graph_cls)}
 
 
-
 class node_prediction_data_helper(object):
     def __init__(self, graph, fanouts, number_of_nodes: int, number_of_relations: int,
                  special_entity_dict: dict, special_relation_dict: dict, train_batch_size: int,
@@ -153,7 +152,6 @@ class node_prediction_data_helper(object):
         else:
             batch_size = self.val_batch_size
             shuffle = False
-        dataloader = DataLoader(dataset=dataset, batch_size=batch_size,
-                                         shuffle=shuffle, pin_memory=True,
-                                         collate_fn=NodeSubGraphDataset.collate_fn)
+        dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=True,
+                                collate_fn=NodeSubGraphDataset.collate_fn)
         return dataloader

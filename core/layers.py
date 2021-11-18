@@ -4,6 +4,7 @@ from torch import nn
 import torch.nn.init as INIT
 from dgl.nn.pytorch.utils import Identity
 
+
 class EmbeddingLayer(nn.Module):
     def __init__(self, num: int, dim: int, project_dim: int = None):
         super(EmbeddingLayer, self).__init__()

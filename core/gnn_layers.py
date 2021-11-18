@@ -8,6 +8,7 @@ from dgl.nn.functional import edge_softmax
 from torch.nn import LayerNorm as layer_norm
 from dgl.base import DGLError
 
+
 class PositionwiseFeedForward(nn.Module):
     "Implements FFN equation."
     def __init__(self, model_dim, d_hidden, dropout=0.1):
@@ -29,8 +30,10 @@ class PositionwiseFeedForward(nn.Module):
         gain = small_init_gain(d_in=self.hidden_dim, d_out=self.model_dim)
         nn.init.xavier_normal_(self.w_2.weight, gain=gain)
 
+
 def small_init_gain(d_in, d_out):
-    return 2.0/(d_in + 4.0 * d_out)
+    return 2.0 / (d_in + 4.0 * d_out)
+
 
 class RGDTLayer(nn.Module):
     def __init__(self,
@@ -39,9 +42,9 @@ class RGDTLayer(nn.Module):
                  out_ent_feats: int,
                  num_heads: int,
                  hop_num: int,
-                 alpha: float=0.15,
-                 feat_drop: float=0.1,
-                 attn_drop: float=0.1,
+                 alpha: float = 0.15,
+                 feat_drop: float = 0.1,
+                 attn_drop: float = 0.1,
                  negative_slope=0.2,
                  residual=True,
                  activation=None,
@@ -59,7 +62,7 @@ class RGDTLayer(nn.Module):
         self._head_dim = self._out_ent_feats // self._num_heads
         self.diff_head_tail = diff_head_tail
 
-        if diff_head_tail: ## make different map
+        if diff_head_tail:  # make different map
             self._ent_fc_head = nn.Linear(self._in_head_ent_feats, self._num_heads * self._head_dim, bias=False)
             self._ent_fc_tail = nn.Linear(self._in_head_ent_feats, self._num_heads * self._head_dim, bias=False)
         else:
@@ -73,7 +76,7 @@ class RGDTLayer(nn.Module):
         self.attn_h = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_t = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_r = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
-        self.attn_activation = nn.PReLU(init=negative_slope)  ### for attention computation
+        self.attn_activation = nn.PReLU(init=negative_slope)  # for attention computation
 
         if residual:
             if in_ent_feats != out_ent_feats:
@@ -136,10 +139,10 @@ class RGDTLayer(nn.Module):
             eh = (feat_head * self.attn_h).sum(dim=-1).unsqueeze(-1)
             et = (feat_tail * self.attn_t).sum(dim=-1).unsqueeze(-1)
             er = (feat_rel * self.attn_r).sum(dim=-1).unsqueeze(-1)
-            ###+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             edge_ids = graph.edata['rid']
             er = er[edge_ids]
-            ###+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             graph.srcdata.update({'ft': feat_head, 'eh': eh})
             graph.dstdata.update({'et': et})
             graph.apply_edges(fn.u_add_v('eh', 'et', 'e'))
@@ -159,7 +162,7 @@ class RGDTLayer(nn.Module):
             rst = rst.flatten(1)
             # +++++++++++++++++++++++++++++++++++++++
             ff_rst = self.feed_forward_layer(self.feat_drop(self.ff_layer_norm(rst)))
-            rst = self.feat_drop(ff_rst) + rst # residual
+            rst = self.feat_drop(ff_rst) + rst  # residual
             # +++++++++++++++++++++++++++++++++++++++
             # activation
             if self.activation:
@@ -183,15 +186,16 @@ class RGDTLayer(nn.Module):
             feat = (1.0 - self._alpha) * self.feat_drop(feat) + self._alpha * feat_0
         return feat
 
+
 class GDTLayer(nn.Module):
     def __init__(self,
                  in_ent_feats: int,
                  out_ent_feats: int,
                  num_heads: int,
                  hop_num: int,
-                 alpha: float=0.15,
-                 feat_drop: float=0.1,
-                 attn_drop: float=0.1,
+                 alpha: float = 0.15,
+                 feat_drop: float = 0.1,
+                 attn_drop: float = 0.1,
                  negative_slope=0.2,
                  residual=True,
                  activation=None,
@@ -208,7 +212,7 @@ class GDTLayer(nn.Module):
         self._head_dim = self._out_ent_feats // self._num_heads
         self.diff_head_tail = diff_head_tail
 
-        if diff_head_tail: ## make different map
+        if diff_head_tail:  # make different map
             self._ent_fc_head = nn.Linear(self._in_head_ent_feats, self._num_heads * self._head_dim, bias=False)
             self._ent_fc_tail = nn.Linear(self._in_head_ent_feats, self._num_heads * self._head_dim, bias=False)
         else:
@@ -219,7 +223,7 @@ class GDTLayer(nn.Module):
 
         self.attn_h = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
         self.attn_t = nn.Parameter(torch.FloatTensor(1, self._num_heads, self._head_dim), requires_grad=True)
-        self.attn_activation = nn.PReLU(init=negative_slope) ### for attention computation
+        self.attn_activation = nn.PReLU(init=negative_slope)  # for attention computation
 
         if residual:
             if in_ent_feats != out_ent_feats:
@@ -278,7 +282,7 @@ class GDTLayer(nn.Module):
                 feat_head = feat_tail = self._ent_fc(ent_head).view(-1, self._num_heads, self._head_dim)
             eh = (feat_head * self.attn_h).sum(dim=-1).unsqueeze(-1)
             et = (feat_tail * self.attn_t).sum(dim=-1).unsqueeze(-1)
-            ###+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             graph.srcdata.update({'ft': feat_head, 'eh': eh})
             graph.dstdata.update({'et': et})
             graph.apply_edges(fn.u_add_v('eh', 'et', 'e'))
@@ -298,7 +302,7 @@ class GDTLayer(nn.Module):
             rst = rst.flatten(1)
             # +++++++++++++++++++++++++++++++++++++++
             ff_rst = self.feed_forward_layer(self.feat_drop(self.ff_layer_norm(rst)))
-            rst = self.feat_drop(ff_rst) + rst # residual
+            rst = self.feat_drop(ff_rst) + rst  # residual
             # +++++++++++++++++++++++++++++++++++++++
             # activation
             if self.activation:

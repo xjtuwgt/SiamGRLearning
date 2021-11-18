@@ -4,6 +4,7 @@ from os.path import join
 from time import time
 import torch
 
+
 def kg_data_path_collection(kg_path, kg_name: str):
     entity_path = join(kg_path, kg_name, 'entities.dict')
     relation_path = join(kg_path, kg_name, 'relations.dict')
@@ -11,6 +12,7 @@ def kg_data_path_collection(kg_path, kg_name: str):
     valid_path = join(kg_path, kg_name, 'valid.txt')
     test_path = join(kg_path, kg_name, 'test.txt')
     return entity_path, relation_path, train_path, valid_path, test_path
+
 
 class KGDataset(object):
     '''Load a knowledge graph
@@ -23,8 +25,9 @@ class KGDataset(object):
     The mapping between entity (relation) Id and entity (relation) name is stored as 'id\tname'.
     The triples are stored as 'head_name\trelation_name\ttail_name'.
     '''
+
     def __init__(self, entity_path, relation_path, train_path,
-                 valid_path=None, test_path=None, format=(0,1,2),
+                 valid_path=None, test_path=None, format=(0, 1, 2),
                  delimiter='\t', skip_first_line=False):
         self.delimiter = delimiter
         self.entity2id, self.n_entities = self.read_entity(entity_path)
@@ -57,7 +60,7 @@ class KGDataset(object):
 
         return relation2id, len(relation2id)
 
-    def read_triple(self, path, mode, skip_first_line=False, format=(0,1,2)):
+    def read_triple(self, path, mode, skip_first_line=False, format=(0, 1, 2)):
         # mode: train/valid/test
         if path is None:
             return None
@@ -80,7 +83,8 @@ class KGDataset(object):
         tails = np.array(tails, dtype=np.int64)
         rels = np.array(rels, dtype=np.int64)
         print('Finished. Read {} {} triples.'.format(len(heads), mode))
-        return (heads, rels, tails)
+        return heads, rels, tails
+
 
 def knowledge_graph_construction_from_triples(num_entities, num_relations, triples, bi_directional=True):
     """ Create a DGL graph. The graph is bidirectional because RGCN authors
@@ -89,7 +93,7 @@ def knowledge_graph_construction_from_triples(num_entities, num_relations, tripl
         (reciprocal of node incoming degree)
     """
     start = time()
-    #+++++++++++++++++++++++++
+    # +++++++++++++++++++++++++
     src, rel, dst = triples
     if bi_directional:
         inv_rel = rel + num_relations

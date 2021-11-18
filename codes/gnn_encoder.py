@@ -7,6 +7,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup, get_cosine_sche
     get_cosine_with_hard_restarts_schedule_with_warmup
 import logging
 
+
 class GDTEncoder(nn.Module):
     def __init__(self, config):
         super(GDTEncoder, self).__init__()
@@ -45,7 +46,8 @@ class GDTEncoder(nn.Module):
                                                       residual=self.config.residual,
                                                       diff_head_tail=self.config.diff_head_tail,
                                                       ppr_diff=self.config.ppr_diff))
-    def init(self, graph_node_emb: Tensor=None, graph_rel_emb: Tensor=None, freeze=False):
+
+    def init(self, graph_node_emb: Tensor = None, graph_rel_emb: Tensor = None, freeze=False):
         if graph_node_emb is not None:
             self.node_embed_layer.init_with_tensor(data=graph_node_emb, freeze=freeze)
             logging.info('Initializing node features with pretrained embeddings')
@@ -71,26 +73,27 @@ class GDTEncoder(nn.Module):
             ent_features = ent_features + arw_pos_embed
         with batch_g.local_scope():
             h = ent_features
-            for l in range(self.config.layers):
-                if l == 0:
-                    h = self.graph_encoder[l](batch_g, h, rel_features)
+            for _ in range(self.config.layers):
+                if _ == 0:
+                    h = self.graph_encoder[_](batch_g, h, rel_features)
                 else:
-                    h = self.graph_encoder[l](batch_g, h)
+                    h = self.graph_encoder[_](batch_g, h)
             graph_cls_embed = h[batch_cls]
             return graph_cls_embed
+
 
 class GraphSimSiamEncoder(nn.Module):
     def __init__(self, config):
         super(GraphSimSiamEncoder, self).__init__()
         self.config = config
         self.graph_encoder = GDTEncoder(config=config)
-        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         self.graph_siam_encoder = SimSiam(base_encoder=self.graph_encoder,
                                           base_encoder_out_dim=self.config.hidden_dim,
                                           dim=self.config.siam_dim,
                                           pred_dim=self.config.siam_pred_dim)
 
-    def init(self, graph_node_emb: Tensor=None, graph_rel_emb: Tensor=None, freeze=False):
+    def init(self, graph_node_emb: Tensor = None, graph_rel_emb: Tensor = None, freeze=False):
         self.graph_encoder.init(graph_node_emb=graph_node_emb, graph_rel_emb=graph_rel_emb, freeze=freeze)
 
     def forward(self, batch):

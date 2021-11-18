@@ -7,10 +7,12 @@ from core.utils import seed_everything
 from core.gpu_utils import get_single_free_gpu
 from evens import HOME_DATA_FOLDER, OUTPUT_FOLDER, KG_DATA_FOLDER
 
+
 def boolean_string(s):
     if s.lower() not in {'false', 'true'}:
         raise ValueError('Not a valid boolean string')
     return s.lower() == 'true'
+
 
 def json_to_argv(json_file):
     j = json.load(open(json_file))
@@ -20,17 +22,19 @@ def json_to_argv(json_file):
         argv.extend(['--' + k, new_v])
     return argv
 
+
 def set_seed(args):
-    ##+++++++++++++++++++++++
+    # +++++++++++++++++++++++
     random_seed = args.seed + args.local_rank
-    ##+++++++++++++++++++++++
+    # +++++++++++++++++++++++
     seed_everything(seed=random_seed)
+
 
 def complete_default_parser(args):
     if args.gpu_id:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     # set n_gpu
-    #+++++++++++++++
+    # +++++++++++++++
     if HOME_DATA_FOLDER.startswith('/dfs/scratch0'):
         args.stanford = 'true'
     if args.local_rank == -1:
@@ -61,6 +65,7 @@ def complete_default_parser(args):
     os.makedirs(args.exp_name, exist_ok=True)
     torch.save(args, join(args.exp_name, "training_args.bin"))
     return args
+
 
 def default_parser():
     parser = argparse.ArgumentParser()

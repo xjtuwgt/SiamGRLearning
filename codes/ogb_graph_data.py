@@ -30,7 +30,7 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
     n_classes = labels.max().data.item()
     node_features = graph.ndata.pop('feat')
     n_feats = node_features.shape[1]
-    if dataset in {'ogbn-products'}: # 'ogbn-proteins'
+    if dataset in {'ogbn-products'}:  # 'ogbn-proteins'
         number_of_edges = graph.number_of_edges()
         edge_type_ids = torch.zeros(number_of_edges, dtype=torch.long)
         graph = add_relation_ids_to_graph(graph=graph, edge_type_ids=edge_type_ids)
@@ -48,7 +48,7 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
 
 
 def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
-    print('Bi-directional homogeneous graph: {}'.format(dataset))
+    logging.info('Bi-directional homogeneous graph: {}'.format(dataset))
     graph, node_split_idx, node_features, nentities, nrelations, n_classes, \
     n_feats = ogb_nodeprop_graph_reconstruction(dataset=dataset)
     graph, number_of_nodes, number_of_relations, \
@@ -57,7 +57,7 @@ def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
                                                                                     hop_num=hop_num)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     number_of_added_nodes = number_of_nodes - nentities
-    print('Added number of nodes = {}'.format(number_of_added_nodes))
+    logging.info('Added number of nodes = {}'.format(number_of_added_nodes))
     assert len(special_entity_dict) == number_of_added_nodes
     if number_of_added_nodes > 0:
         added_node_features = torch.zeros((number_of_added_nodes, node_features.shape[1]), dtype=torch.float)

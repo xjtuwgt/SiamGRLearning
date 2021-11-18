@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import dgl
 
+
 def seed_everything(seed: int) -> int:
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)

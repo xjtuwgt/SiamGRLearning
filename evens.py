@@ -9,7 +9,7 @@ sys.path.append(join(PROJECT_FOLDER))
 # Define the dataset folder and model folder based on environment
 HOME_DATA_FOLDER = join(PROJECT_FOLDER, 'data')
 os.makedirs(HOME_DATA_FOLDER, exist_ok=True)
-print('*' * 35, ' path infor ', '*' * 35)
+print('*' * 35, ' path information ', '*' * 35)
 print('Data folder = {}'.format(HOME_DATA_FOLDER))
 OUTPUT_FOLDER = join(HOME_DATA_FOLDER, 'output')
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)

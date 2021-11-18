@@ -1,4 +1,6 @@
 import torch.nn as nn
+
+
 class SimSiam(nn.Module):
     """
     Build a SimSiam model.
@@ -12,19 +14,20 @@ class SimSiam(nn.Module):
         # create the encoder = base_encoder + a 3-layer projector
         self.prev_dim = base_encoder_out_dim
         self.encoder = nn.Sequential(base_encoder,
-                                        nn.Linear(self.prev_dim, self.prev_dim, bias=False),
-                                        nn.BatchNorm1d(self.prev_dim),
-                                        nn.ReLU(inplace=True), # first layer
-                                        nn.Linear(self.prev_dim, self.prev_dim, bias=False),
-                                        nn.BatchNorm1d(self.prev_dim),
-                                        nn.ReLU(inplace=True), # second layer
-                                        nn.Linear(self.prev_dim, dim, bias=False),
-                                        nn.BatchNorm1d(dim, affine=False)) # output layer
+                                     nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+                                     nn.BatchNorm1d(self.prev_dim),
+                                     nn.ReLU(inplace=True),  # first layer
+                                     nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+                                     nn.BatchNorm1d(self.prev_dim),
+                                     nn.ReLU(inplace=True),  # second layer
+                                     nn.Linear(self.prev_dim, dim, bias=False),
+                                     nn.BatchNorm1d(dim, affine=False))  # output layer
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
-                                        nn.BatchNorm1d(pred_dim),
-                                        nn.ReLU(inplace=True), # hidden layer
-                                        nn.Linear(pred_dim, dim)) # output layer
+                                       nn.BatchNorm1d(pred_dim),
+                                       nn.ReLU(inplace=True),  # hidden layer
+                                       nn.Linear(pred_dim, dim))  # output layer
+
     def forward(self, x1, x2):
         """
         Input:
@@ -35,9 +38,9 @@ class SimSiam(nn.Module):
             See Sec. 3 of https://arxiv.org/abs/2011.10566 for detailed notations
         """
         # compute features for one view
-        z1 = self.encoder(x1) # NxC
-        z2 = self.encoder(x2) # NxC
+        z1 = self.encoder(x1)  # NxC
+        z2 = self.encoder(x2)  # NxC
 
-        p1 = self.predictor(z1) # NxC
-        p2 = self.predictor(z2) # NxC
+        p1 = self.predictor(z1)  # NxC
+        p2 = self.predictor(z2)  # NxC
         return p1, p2, z1.detach(), z2.detach()

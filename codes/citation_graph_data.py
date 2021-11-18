@@ -58,7 +58,7 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
 
 
 def citation_subgraph_pretrain_dataloader(args):
-    graph, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
+    graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
     special_relation_dict, n_classes, n_feats = \
         citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
     logging.info('Number of nodes = {}'.format(number_of_nodes))
@@ -97,5 +97,3 @@ def citation_node_pred_subgraph_data_helper(args):
                                               train_batch_size=args.per_gpu_train_batch_size, node_split_idx=None,
                                               val_batch_size=args.eval_batch_size, graph_type=args.graph_type)
     return data_helper
-
-
