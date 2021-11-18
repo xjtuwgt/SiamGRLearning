@@ -9,7 +9,19 @@ from evens import HOME_DATA_FOLDER as ogb_root
 from codes.graph_pretrained_dataset import SubGraphPairDataset
 import logging
 
+
 def ogb_nodeprop_graph_reconstruction(dataset: str):
+    """
+    :param dataset:
+    'undirected':
+       'ogbn-products': an undirected and unweighted graph (Amazon product)
+       'ogbn-proteins': dataset is an undirected, weighted, and typed (according to species) graph
+    'directed':
+       'ogbn-arxiv': is a directed graph, representing the citation network (MAG) - Microsoft Academic Graph
+       'ogbn-papers100M': dataset is a directed citation graph (MAG)
+       'ogbn-mag' dataset is a heterogeneous network composed of a subset of the Microsoft Academic Graph
+    :return:
+    """
     data = DglNodePropPredDataset(name=dataset, root=ogb_root)
     node_split_idx = data.get_idx_split()
     graph, labels = data[0]
@@ -70,7 +82,7 @@ def ogb_subgraph_pretrain_dataloader(args):
 def ogb_node_pred_subgraph_data_helper(args):
     graph, node_split_idx, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
     special_relation_dict, n_classes, n_feats = \
-        ogb_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
+        ogb_khop_graph_reconstruction(dataset=args.ogb_node_name, hop_num=args.sub_graph_hop_num)
     logging.info('Number of nodes = {}'.format(number_of_nodes))
     args.node_number = number_of_nodes
     logging.info('Node features = {}'.format(n_feats))
