@@ -2,9 +2,12 @@ import torch
 from ogb.nodeproppred import DglNodePropPredDataset
 from core.graph_utils import add_relation_ids_to_graph, construct_special_graph_dictionary
 import torch.nn.init as INIT
+from torch.utils.data import DataLoader
+from codes.graph_train_dataset import node_prediction_data_helper
 from core.gnn_layers import small_init_gain
 from evens import HOME_DATA_FOLDER as ogb_root
-
+from codes.graph_pretrained_dataset import SubGraphPairDataset
+import logging
 
 def ogb_nodeprop_graph_reconstruction(dataset: str):
     data = DglNodePropPredDataset(name=dataset, root=ogb_root)
@@ -19,7 +22,7 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
     nentities, nrelations = graph.number_of_nodes(), 1
     return graph, node_split_idx, node_features, nentities, nrelations, n_classes, n_feats
 
-def ogb_khop_nodeprop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
+def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     print('Bi-directional homogeneous graph: {}'.format(dataset))
     graph, node_split_idx, node_features, nentities, nrelations, n_classes, \
     n_feats = ogb_nodeprop_graph_reconstruction(dataset=dataset)
@@ -42,5 +45,47 @@ def ogb_khop_nodeprop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     return graph, node_split_idx, node_features, number_of_nodes, number_of_relations, \
            special_entity_dict, special_relation_dict, n_classes, n_feats
 
-graph, node_split_idx, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
-special_relation_dict, n_classes, n_feats = ogb_khop_nodeprop_graph_reconstruction(dataset='ogbn-arxiv')
+
+def ogb_subgraph_pretrain_dataloader(args):
+    graph, node_split_idx, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
+    special_relation_dict, n_classes, n_feats = \
+        ogb_khop_graph_reconstruction(dataset=args.ogb_node_name, hop_num=args.sub_graph_hop_num)
+    logging.info('Number of nodes = {}'.format(number_of_nodes))
+    args.node_number = number_of_nodes
+    logging.info('Node features = {}'.format(n_feats))
+    args.node_emb_dim = n_feats
+    logging.info('Number of relations = {}'.format(number_of_relations))
+    args.relation_number = number_of_relations
+    logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
+    fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    ogb_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+                                      special_entity2id=special_entity_dict,
+                                      special_relation2id=special_relation_dict, fanouts=fanouts)
+    ogb_dataloader = DataLoader(dataset=ogb_dataset, batch_size=args.per_gpu_train_batch_size,
+                                shuffle=True, pin_memory=True, drop_last=True,
+                                collate_fn=SubGraphPairDataset.collate_fn)
+    return ogb_dataloader, node_features, n_classes
+
+
+def ogb_node_pred_subgraph_data_helper(args):
+    graph, node_split_idx, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
+    special_relation_dict, n_classes, n_feats = \
+        ogb_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
+    logging.info('Number of nodes = {}'.format(number_of_nodes))
+    args.node_number = number_of_nodes
+    logging.info('Node features = {}'.format(n_feats))
+    args.node_emb_dim = n_feats
+    logging.info('Number of relations = {}'.format(number_of_relations))
+    args.relation_number = number_of_relations
+    logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
+    fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    data_helper = node_prediction_data_helper(graph=graph, fanouts=fanouts,
+                                              number_of_nodes=number_of_nodes,
+                                              number_of_relations=number_of_relations,
+                                              special_entity_dict=special_entity_dict,
+                                              special_relation_dict=special_relation_dict,
+                                              train_batch_size=args.per_gpu_train_batch_size,
+                                              val_batch_size=args.eval_batch_size, node_split_idx=node_split_idx,
+                                              graph_type='ogb')
+
+    return data_helper

@@ -1,43 +1,12 @@
 import torch
 from dgl.data import CoraGraphDataset, CiteseerGraphDataset, PubmedGraphDataset
 from codes.graph_pretrained_dataset import SubGraphPairDataset
-from codes.graph_train_dataset import NodeSubGraphDataset
+from codes.graph_train_dataset import node_prediction_data_helper
 from torch.utils.data import DataLoader
 from core.graph_utils import add_relation_ids_to_graph, construct_special_graph_dictionary
 import torch.nn.init as INIT
 from core.gnn_layers import small_init_gain
 import logging
-
-
-class citation_data_helper(object):
-    def __init__(self, graph, fanouts, number_of_nodes, number_of_relations,
-                 special_entity_dict, special_relation_dict, train_batch_size, val_batch_size):
-        self.graph = graph
-        self.fanouts = fanouts
-        self.number_of_nodes = number_of_nodes
-        self.number_of_relations = number_of_relations
-        self.special_entity_dict = special_entity_dict
-        self.special_relation_dict = special_relation_dict
-        self.train_batch_size = train_batch_size
-        self.val_batch_size = val_batch_size
-
-    def data_loader(self, data_type):
-        citation_dataset = NodeSubGraphDataset(graph=self.graph, nentity=self.number_of_nodes,
-                                               nrelation=self.number_of_relations,
-                                               special_entity2id=self.special_entity_dict,
-                                               special_relation2id=self.special_relation_dict,
-                                               data_type=data_type,
-                                               fanouts=self.fanouts)
-        if data_type in {'train'}:
-            batch_size = self.train_batch_size
-            shuffle = True
-        else:
-            batch_size = self.val_batch_size
-            shuffle = False
-        citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=batch_size,
-                                         shuffle=shuffle, pin_memory=True,
-                                         collate_fn=NodeSubGraphDataset.collate_fn)
-        return citation_dataloader
 
 
 def citation_graph_reconstruction(dataset: str):
@@ -88,7 +57,7 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
            special_entity_dict, special_relation_dict, n_classes, n_feats
 
 
-def citation_subgraph_pair_dataset(args):
+def citation_subgraph_pretrain_dataloader(args):
     graph, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
     special_relation_dict, n_classes, n_feats = \
         citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
@@ -100,15 +69,16 @@ def citation_subgraph_pair_dataset(args):
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
     fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
-    citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes,
-                                           nrelation=number_of_relations,
+    citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
                                            special_entity2id=special_entity_dict,
-                                           special_relation2id=special_relation_dict,
-                                           fanouts=fanouts)
-    return citation_dataset, node_features, n_classes
+                                           special_relation2id=special_relation_dict, fanouts=fanouts)
+    citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=args.per_gpu_train_batch_size,
+                                     shuffle=True, pin_memory=True, drop_last=True,
+                                     collate_fn=SubGraphPairDataset.collate_fn)
+    return citation_dataloader, node_features, n_classes
 
 
-def citation_subgraph_data_helper(args):
+def citation_node_pred_subgraph_data_helper(args):
     graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
     special_relation_dict, n_classes, n_feats = \
         citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
@@ -120,21 +90,12 @@ def citation_subgraph_data_helper(args):
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
     fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
-    data_helper = citation_data_helper(graph=graph, fanouts=fanouts,
-                                       number_of_nodes=number_of_nodes,
-                                       number_of_relations=number_of_relations,
-                                       special_entity_dict=special_entity_dict,
-                                       special_relation_dict=special_relation_dict,
-                                       train_batch_size=args.per_gpu_train_batch_size,
-                                       val_batch_size=args.eval_batch_size)
+    data_helper = node_prediction_data_helper(graph=graph, fanouts=fanouts, number_of_nodes=number_of_nodes,
+                                              number_of_relations=number_of_relations,
+                                              special_entity_dict=special_entity_dict,
+                                              special_relation_dict=special_relation_dict,
+                                              train_batch_size=args.per_gpu_train_batch_size,
+                                              val_batch_size=args.eval_batch_size, graph_type='citation')
     return data_helper
 
-def citation_subgraph_pretrain_dataloader(args):
-    citation_dataset, node_features, n_classes = citation_subgraph_pair_dataset(args=args)
-    citation_dataloader = DataLoader(dataset=citation_dataset,
-                                     batch_size=args.per_gpu_train_batch_size,
-                                     shuffle=True,
-                                     pin_memory=True,
-                                     drop_last=True,
-                                     collate_fn=SubGraphPairDataset.collate_fn)
-    return citation_dataloader, node_features, n_classes
+
