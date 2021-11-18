@@ -78,17 +78,20 @@ def default_parser():
     parser.add_argument('--kg_name', type=str, default='FB15k-237')
     parser.add_argument('--kg_bi_directed', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--citation_name', type=str, default='citeseer')
+    parser.add_argument('--citation_name', type=str, default='cora')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
     parser.add_argument('--sub_graph_edge_dir', type=str, default='in')
+    parser.add_argument('--arw_position', type=boolean_string, default='true')
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--relation_number', type=int, default=2)
     parser.add_argument('--relation_emb_dim', type=int, default=300)
     parser.add_argument('--node_number', type=int, default=300)
     parser.add_argument('--node_emb_dim', type=int, default=300)
+    parser.add_argument('--arw_pos_emb_dim', type=int, default=300)
     parser.add_argument('--siam_dim', type=int, default=1024)
     parser.add_argument('--siam_pred_dim', type=int, default=512)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

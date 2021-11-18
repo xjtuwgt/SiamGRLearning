@@ -13,6 +13,15 @@ class GDTEncoder(nn.Module):
         self.config = config
         self.node_embed_layer = EmbeddingLayer(num=self.config.node_number, dim=self.config.node_emb_dim)
         self.relation_embed_layer = EmbeddingLayer(num=self.config.relation_number, dim=self.config.relation_emb_dim)
+        if self.config.arw_position:
+            arw_position_num = self.config.sub_graph_hop_num + 2
+            if self.config.node_emb_dim == self.config.arw_pos_emb_dim:
+                self.arw_position_embed_layer = EmbeddingLayer(num=arw_position_num,
+                                                               dim=self.config.arw_pos_emb_dim)
+            else:
+                self.arw_position_embed_layer = EmbeddingLayer(num=arw_position_num,
+                                                               dim=self.config.arw_pos_emb_dim,
+                                                               project_dim=self.config.node_emb_dim)
         self.graph_encoder = nn.ModuleList()
         self.graph_encoder.append(module=RGDTLayer(in_ent_feats=self.config.node_emb_dim,
                                                    in_rel_feats=self.config.relation_emb_dim,
@@ -54,6 +63,10 @@ class GDTEncoder(nn.Module):
         rel_ids = batch_g.edata['rid']
         ent_features = self.node_embed_layer(ent_ids)
         rel_features = self.relation_embed_layer(rel_ids)
+        if self.config.arw_position:
+            arw_positions = batch_g.ndata['n_rw_label']
+            arw_pos_embed = self.arw_position_embed_layer(arw_positions)
+            ent_features = ent_features + arw_pos_embed
         with batch_g.local_scope():
             h = ent_features
             for l in range(self.config.layers):

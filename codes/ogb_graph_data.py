@@ -5,6 +5,7 @@ import torch.nn.init as INIT
 from core.gnn_layers import small_init_gain
 from evens import HOME_DATA_FOLDER as ogb_root
 
+
 def ogb_nodeprop_graph_reconstruction(dataset: str):
     data = DglNodePropPredDataset(name=dataset, root=ogb_root)
     node_split_idx = data.get_idx_split()
