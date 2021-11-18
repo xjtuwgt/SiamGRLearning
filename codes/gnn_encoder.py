@@ -100,6 +100,10 @@ class GraphSimSiamEncoder(nn.Module):
         p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'])
         return p1, p2, z1, z2
 
+    def encode(self, batch):
+        embed = self.graph_siam_encoder.encode(x=batch)
+        return embed
+
     def pretrain_optimizer_scheduler(self, total_steps):
         "Prepare optimizer and schedule (linear warmup and decay)"
         optimization_params = self.parameters()

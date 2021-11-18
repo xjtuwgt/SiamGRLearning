@@ -8,7 +8,7 @@ class SimSiam(nn.Module):
     def __init__(self, base_encoder, base_encoder_out_dim: int, dim=1024, pred_dim=512):
         """
         dim: feature dimension (default: 2048)
-        pred_dim: hidden dimension of the predictor (default: 512)
+        pred_dim: hidden dimension of the projector (default: 512)
         """
         super(SimSiam, self).__init__()
         # create the encoder = base_encoder + a 3-layer projector
@@ -22,8 +22,8 @@ class SimSiam(nn.Module):
                                      nn.ReLU(inplace=True),  # second layer
                                      nn.Linear(self.prev_dim, dim, bias=False),
                                      nn.BatchNorm1d(dim, affine=False))  # output layer
-        # build a 2-layer predictor
-        self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
+        # build a 2-layer projection
+        self.projector = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
                                        nn.BatchNorm1d(pred_dim),
                                        nn.ReLU(inplace=True),  # hidden layer
                                        nn.Linear(pred_dim, dim))  # output layer
@@ -41,6 +41,11 @@ class SimSiam(nn.Module):
         z1 = self.encoder(x1)  # NxC
         z2 = self.encoder(x2)  # NxC
 
-        p1 = self.predictor(z1)  # NxC
-        p2 = self.predictor(z2)  # NxC
+        p1 = self.projector(z1)  # NxC
+        p2 = self.projector(z2)  # NxC
         return p1, p2, z1.detach(), z2.detach()
+
+    def encode(self, x):
+        z = self.encoder(x)
+        p = self.predictor(z)
+        return p
