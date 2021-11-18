@@ -43,12 +43,13 @@ citation_data_name = 'citeseer'
 graph, node_features, number_of_nodes, number_of_relations, special_entity_dict, \
 special_relation_dict, n_classes, n_feats = \
     citation_khop_graph_reconstruction(dataset=citation_data_name, hop_num=6)
-print('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
-print(graph.number_of_nodes())
-print(graph.ndata['label'])
 print(graph.ndata)
-start_time = time()
-fanouts = [10,5,5,5]
+# print('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
+# print(graph.number_of_nodes())
+# print(graph.ndata['label'])
+# print(graph.ndata)
+# start_time = time()
+# fanouts = [10,5,5,5]
 # # fanouts = [-1,-1,-1,-1]
 # citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes,
 #                                    nrelation=number_of_relations,
@@ -68,9 +69,10 @@ fanouts = [10,5,5,5]
 
 # ogb_dataname = 'ogbn-arxiv'
 #
-# # data = DglNodePropPredDataset(name=ogb_dataname, root=HOME_DATA_FOLDER)
-# # graph, labels = data[0]
-# # print(graph)
+# data = DglNodePropPredDataset(name=ogb_dataname, root=HOME_DATA_FOLDER)
+# graph, labels = data[0]
+# print(graph.number_of_nodes())
+# print(labels.shape)
 # graph, node_split_idx, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
 # special_relation_dict, n_classes, n_feats = \
 #         ogb_khop_graph_reconstruction(dataset=ogb_dataname, hop_num=6)

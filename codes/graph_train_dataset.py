@@ -114,14 +114,17 @@ class NodeSubGraphDataset(Dataset):
                                                             special_relation_dict=self.special_relation2id,
                                                             node_arw_label_dict=node_arw_label_dict,
                                                             bi_directed=self.bi_directed, debug=False)
-        return subgraph
+        class_label = self.g.ndata['label'][node_idx]
+        return subgraph, class_label
 
     @staticmethod
     def collate_fn(data):
-        batch_graph_cls = torch.as_tensor([_.number_of_nodes() for _ in data], dtype=torch.long)
+        assert len(data[0]) == 2
+        batch_graph_cls = torch.as_tensor([_[0].number_of_nodes() for _ in data], dtype=torch.long)
         batch_graph_cls = torch.cumsum(batch_graph_cls, dim=0) - 1
-        batch_graphs = dgl.batch([_ for _ in data])
-        return {'batch_graph': (batch_graphs, batch_graph_cls)}
+        batch_graphs = dgl.batch([_[0] for _ in data])
+        batch_label = torch.as_tensor([_[1] for _ in data], dtype=torch.long)
+        return {'batch_graph': (batch_graphs, batch_graph_cls), 'batch_label': batch_label}
 
 
 class node_prediction_data_helper(object):

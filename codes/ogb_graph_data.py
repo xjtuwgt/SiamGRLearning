@@ -27,6 +27,9 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
     data = DglNodePropPredDataset(name=dataset, root=ogb_root)
     node_split_idx = data.get_idx_split()
     graph, labels = data[0]
+    # +++++++++++++++++++++++++++++++++
+    graph.ndata['label'] = labels
+    # +++++++++++++++++++++++++++++++++
     n_classes = labels.max().data.item()
     node_features = graph.ndata.pop('feat')
     n_feats = node_features.shape[1]
@@ -55,6 +58,8 @@ def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     special_entity_dict, special_relation_dict = construct_special_graph_dictionary(graph=graph, n_entities=nentities,
                                                                                     n_relations=nrelations,
                                                                                     hop_num=hop_num)
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    graph.ndata['label'][-2:] = -1
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     number_of_added_nodes = number_of_nodes - nentities
     logging.info('Added number of nodes = {}'.format(number_of_added_nodes))

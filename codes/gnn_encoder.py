@@ -101,7 +101,7 @@ class GraphSimSiamEncoder(nn.Module):
         return p1, p2, z1, z2
 
     def encode(self, batch):
-        embed = self.graph_siam_encoder.encode(x=batch)
+        embed = self.graph_siam_encoder.encode(x=batch['batch_graph'])
         return embed
 
     def pretrain_optimizer_scheduler(self, total_steps):
