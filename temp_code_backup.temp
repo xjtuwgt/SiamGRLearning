@@ -57,3 +57,69 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
     assert (hop_relation in special_relation_dict) and (hop_neighbor in neighbors_dict)
     hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
     hop_neighbor_ids, hop_neighbor_freq = hop_neighbor_ids.numpy(), hop_neighbor_freq.numpy()
+
+
+class OGBNodeSubGraphDataset(Dataset):
+    def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
+                 special_entity2id: dict, special_relation2id: dict, data_type: str,
+                 node_split_idx: dict, bi_directed=True, edge_dir='in'):
+        assert len(fanouts) > 0 and (data_type in {'train', 'valid', 'test'})
+        self.fanouts = fanouts  # list of int == number of hops for sampling
+        self.hop_num = len(fanouts)
+        self.g = graph
+        #####################
+        self.data_node_ids = node_split_idx[data_type]
+        self.len = self.data_node_ids.shape[0]
+        assert self.len > 0
+        #####################
+        self.nentity, self.nrelation = nentity, nrelation
+        self.bi_directed = bi_directed
+        self.edge_dir = edge_dir  # "in", "out"
+        self.special_entity2id, self.special_relation2id = special_entity2id, special_relation2id
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        node_idx = self.data_node_ids[idx]
+        anchor_node_ids = torch.LongTensor([node_idx])
+        samp_hop_num = random.randint(2, self.hop_num+1)
+        samp_fanouts = self.fanouts[:samp_hop_num]
+        cls_node_ids = torch.LongTensor([self.special_entity2id['cls']])
+        neighbors_dict, node_arw_label_dict, edge_dict = \
+            sub_graph_neighbor_sample(graph=self.g, anchor_node_ids=anchor_node_ids,
+                                      cls_node_ids=cls_node_ids, fanouts=samp_fanouts,
+                                      edge_dir=self.edge_dir, debug=False)
+        subgraph, parent2sub_dict = cls_sub_graph_extractor(graph=self.g, edge_dict=edge_dict,
+                                                            neighbors_dict=neighbors_dict,
+                                                            special_relation_dict=self.special_relation2id,
+                                                            node_arw_label_dict=node_arw_label_dict,
+                                                            bi_directed=self.bi_directed, debug=False)
+        return subgraph
+
+    @staticmethod
+    def collate_fn(data):
+        batch_graph_cls = torch.as_tensor([_.number_of_nodes() for _ in data], dtype=torch.long)
+        batch_graph_cls = torch.cumsum(batch_graph_cls, dim=0) - 1
+        batch_graphs = dgl.batch([_ for _ in data])
+        return {'batch_graph': (batch_graphs, batch_graph_cls)}
+
+
+def citation_subgraph_pair_dataset(args):
+    graph, node_features, number_of_nodes, number_of_relations, special_entity_dict,\
+    special_relation_dict, n_classes, n_feats = \
+        citation_khop_graph_reconstruction(dataset=args.citation_name, hop_num=args.sub_graph_hop_num)
+    logging.info('Number of nodes = {}'.format(number_of_nodes))
+    args.node_number = number_of_nodes
+    logging.info('Node features = {}'.format(n_feats))
+    args.node_emb_dim = n_feats
+    logging.info('Number of relations = {}'.format(number_of_relations))
+    args.relation_number = number_of_relations
+    logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
+    fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes,
+                                           nrelation=number_of_relations,
+                                           special_entity2id=special_entity_dict,
+                                           special_relation2id=special_relation_dict,
+                                           fanouts=fanouts)
+    return citation_dataset, node_features, n_classes
