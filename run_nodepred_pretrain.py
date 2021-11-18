@@ -89,7 +89,12 @@ best_accuracy = 0.0
 best_model_name = None
 training_logs = []
 # #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-logging.info('Staring Pretraining over graph = {}'.format(args.citation_name))
+if args.graph_type == 'citation':
+    logging.info('Staring Pretraining over graph = {}'.format(args.citation_name))
+elif args.graph_type == 'ogb':
+    logging.info('Staring Pretraining over graph = {}'.format(args.ogb_node_name))
+else:
+    raise 'Graph type {} is not supported'.format(args.graph_type)
 pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
                            disable=args.local_rank not in [-1, 0])
 for epoch_idx, epoch in enumerate(pretrain_iterator):
@@ -99,30 +104,30 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         for key, value in batch.items():
             batch[key] = (value[0].to(args.device), value[1].to(args.device))
-#         p1, p2, z1, z2 = graph_encoder.forward(batch)
-#         loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
-#         del batch
-#         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#         if args.n_gpu > 1:
-#             loss = loss.mean()
-#         if args.gradient_accumulation_steps > 1:
-#             loss = loss / args.gradient_accumulation_steps
-#         loss.backward()
-#         torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), args.max_grad_norm)
-#         training_logs.append({'Train_loss': loss.data.item()})
-#         if (step + 1) % args.gradient_accumulation_steps == 0:
-#             optimizer.step()
-#             scheduler.step()  # Update learning rate schedule
-#             graph_encoder.zero_grad()
-#             global_step += 1
-#             if args.local_rank in [-1, 0] and args.logging_steps > 0 and global_step % args.logging_steps == 0:
-#                 metrics = {}
-#                 for metric in training_logs[0].keys():
-#                     metrics[metric] = sum([log[metric] for log in training_logs])/len(training_logs)
-#                 training_logs = []
-#                 logging.info('Pre-trained model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
-#                 for key, value in metrics.items():
-#                     logging.info('Metric {}: {:.5f}'.format(key, value))
-#         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#         if torch.cuda.is_available():
-#             torch.cuda.empty_cache()
+        p1, p2, z1, z2 = graph_encoder.forward(batch)
+        loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
+        del batch
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if args.n_gpu > 1:
+            loss = loss.mean()
+        if args.gradient_accumulation_steps > 1:
+            loss = loss / args.gradient_accumulation_steps
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), args.max_grad_norm)
+        training_logs.append({'Train_loss': loss.data.item()})
+        if (step + 1) % args.gradient_accumulation_steps == 0:
+            optimizer.step()
+            scheduler.step()  # Update learning rate schedule
+            graph_encoder.zero_grad()
+            global_step += 1
+            if args.local_rank in [-1, 0] and args.logging_steps > 0 and global_step % args.logging_steps == 0:
+                metrics = {}
+                for metric in training_logs[0].keys():
+                    metrics[metric] = sum([log[metric] for log in training_logs])/len(training_logs)
+                training_logs = []
+                logging.info('Pre-trained model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
+                for key, value in metrics.items():
+                    logging.info('Metric {}: {:.5f}'.format(key, value))
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
