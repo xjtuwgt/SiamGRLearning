@@ -4,7 +4,7 @@ import torch
 # from dgl.data import CoraGraphDataset, CiteseerGraphDataset, PubmedGraphDataset
 import numpy as np
 import matplotlib.pyplot as plt
-temp_file_name = '/Users/wangguangtao/Desktop/desktop/temp.txt'
+temp_file_name = '/Users/wangguangtao/Desktop/desktop/temp1.txt'
 def add_self_loop_in_graph(graph, self_loop_r: int):
     """
     :param graph:

@@ -78,7 +78,7 @@ def default_parser():
     parser.add_argument('--kg_name', type=str, default='FB15k-237')
     parser.add_argument('--kg_bi_directed', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--citation_name', type=str, default='cora')
+    parser.add_argument('--citation_name', type=str, default='citeseer')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
