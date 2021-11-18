@@ -280,7 +280,7 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         aug_sub_graph = copy.deepcopy(subgraph)
         number_of_nodes = subgraph.number_of_nodes()
         node_ids = torch.arange(number_of_nodes - 1)
-        self_loop_r = torch.full((number_of_nodes - 1,), special_relation_dict['loop_r'])
+        self_loop_r = torch.full((number_of_nodes - 1,), special_relation_dict['loop_r'], dtype=torch.long)
         aug_sub_graph.add_edges(node_ids, node_ids, {'rid': self_loop_r})
         assert subgraph.number_of_nodes() == aug_sub_graph.number_of_nodes()
         return aug_sub_graph
@@ -296,8 +296,8 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         relation_idx = special_relation_dict['{}_r'.format(hop_neighbor)]
         hop_neighbor_ids, hop_neighbor_freq = filtered_neighbors_dict[hop_neighbor]
         hop_neighbor_ids = torch.as_tensor([parent2sub_dict[_] for _ in hop_neighbor_ids.tolist()], dtype=torch.long)
-        anchor_array = torch.full(hop_neighbor_ids.shape, anchor_idx)
-        relation_array = torch.full(hop_neighbor_ids.shape, relation_idx)
+        anchor_array = torch.full(hop_neighbor_ids.shape, anchor_idx, dtype=torch.long)
+        relation_array = torch.full(hop_neighbor_ids.shape, relation_idx, dtype=torch.long)
         if edge_dir == 'in':
             src_nodes = hop_neighbor_ids
             dst_nodes = anchor_array
@@ -311,7 +311,7 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
             else:
                 rev_relation = '{}_r'.format(hop_neighbor.replace('out', 'in'))
             rev_relation_idx = special_relation_dict[rev_relation]
-            rev_relation_array = torch.full(hop_neighbor_ids.shape, rev_relation_idx)
+            rev_relation_array = torch.full(hop_neighbor_ids.shape, rev_relation_idx, dtype=torch.long)
             aug_sub_graph.add_edges(torch.cat([src_nodes, dst_nodes]),
                                     torch.cat([dst_nodes, src_nodes]),
                                     {'rid': torch.cat([relation_array, rev_relation_array])})
