@@ -2,6 +2,9 @@ from evens import KG_DATA_FOLDER
 from core.kg_utils import KGDataset, kg_data_path_collection, \
     knowledge_graph_construction_from_triples
 from core.graph_utils import construct_special_graph_dictionary
+from codes.graph_pretrained_dataset import SubGraphPairDataset
+from torch.utils.data import DataLoader
+import logging
 
 
 def knowledge_graph_khop_reconstruction(dataset: str, hop_num=5, bi_directed: bool = True):
@@ -22,3 +25,22 @@ def knowledge_graph_khop_reconstruction(dataset: str, hop_num=5, bi_directed: bo
     assert len(special_entity_dict) == number_of_added_nodes
     print('Graph nodes: {}, edges: {}'.format(graph.number_of_nodes(), graph.number_of_edges()))
     return graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
+
+
+def kg_subgraph_pretrain_dataloader(args):
+    graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict = \
+        knowledge_graph_khop_reconstruction(dataset=args.kg_name, hop_num=args.sub_graph_hop_num)
+    logging.info('Number of nodes = {}'.format(number_of_nodes))
+    args.node_number = number_of_nodes
+    logging.info('Number of relations = {}'.format(number_of_relations))
+    args.relation_number = number_of_relations
+    logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
+    fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    kg_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+                                           special_entity2id=special_entity_dict,
+                                           special_relation2id=special_relation_dict, fanouts=fanouts)
+    kg_dataloader = DataLoader(dataset=kg_dataset, batch_size=args.per_gpu_train_batch_size,
+                                     shuffle=True, pin_memory=True, drop_last=True,
+                                     collate_fn=SubGraphPairDataset.collate_fn)
+    return kg_dataloader
+

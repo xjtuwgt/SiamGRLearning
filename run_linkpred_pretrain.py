@@ -5,10 +5,7 @@ from tqdm import tqdm, trange
 import sys
 from tensorboardX import SummaryWriter
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
-from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
-from codes.citation_graph_data import citation_node_pred_subgraph_data_helper
-from codes.ogb_graph_data import ogb_subgraph_pretrain_dataloader
-from codes.ogb_graph_data import ogb_node_pred_subgraph_data_helper
+from codes.knowledge_graph_data import kg_subgraph_pretrain_dataloader
 from codes.gnn_encoder import GraphSimSiamEncoder
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -35,23 +32,12 @@ for key, value in vars(args).items():
     logger.info('Hype-parameter\t{} = {}'.format(key, value))
 logging.info('*' * 75)
 #########################################################################
-if args.graph_type == 'citation':
-    pretrain_dataloader, node_features, n_classes = citation_subgraph_pretrain_dataloader(args=args)
+if args.graph_type == 'kg':
+    pretrain_dataloader = kg_subgraph_pretrain_dataloader(args=args)
     logging.info('Loading pretrained data = {} for {} completed'.format(len(pretrain_dataloader), args.graph_type))
     logging.info('*' * 75)
-    node_data_helper = citation_node_pred_subgraph_data_helper(args=args)
-elif args.graph_type == 'ogb':
-    pretrain_dataloader, node_features, n_classes = ogb_subgraph_pretrain_dataloader(args=args)
-    logging.info('Loading pretrained data = {} for {} completed'.format(len(pretrain_dataloader), args.graph_type))
-    logging.info('*' * 75)
-    node_data_helper = ogb_node_pred_subgraph_data_helper(args=args)
 else:
     raise 'Graph type = {} is not supported'.format(args.graph_type)
-
-train_dataloader = node_data_helper.data_loader(data_type='train')
-logging.info('Loading training data = {} completed'.format(len(train_dataloader)))
-val_dataloader = node_data_helper.data_loader(data_type='valid')
-logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
 logging.info('*' * 75)
 #########################################################################
 for key, value in vars(args).items():
@@ -60,7 +46,7 @@ for key, value in vars(args).items():
 logging.info('*' * 75)
 #########################################################################
 graph_encoder = GraphSimSiamEncoder(config=args)
-graph_encoder.init(graph_node_emb=node_features)
+graph_encoder.init(graph_node_emb=None)
 graph_encoder.to(args.device)
 # #########################################################################
 # # Print model information
@@ -95,6 +81,8 @@ if args.graph_type == 'citation':
     logging.info('Staring Pretraining over graph = {}'.format(args.citation_name))
 elif args.graph_type == 'ogb':
     logging.info('Staring Pretraining over graph = {}'.format(args.ogb_node_name))
+elif args.graph_type == 'kg':
+    logging.info('Staring Pretraining over graph = {}'.format(args.kg_name))
 else:
     raise 'Graph type {} is not supported'.format(args.graph_type)
 pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
