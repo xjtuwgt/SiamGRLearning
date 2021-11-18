@@ -27,23 +27,23 @@ def add_self_loop_in_graph(graph, self_loop_r: int):
 #
 # add_self_loop_in_graph(graph=g, self_loop_r=10000)
 # print(g)
-train_loss_list = []
-with open(temp_file_name) as file:
-    lines = file.readlines()
-    for line in lines:
-        if 'Train_loss' in line:
-            tokens = line.split(':')
-            metric = float(tokens[-1].strip())
-            train_loss_list.append(metric)
-            # print(line)
-            # print(metric)
-x = (np.arange(len(train_loss_list)) + 1) * 5
-train_loss = np.array(train_loss_list)
-# for _ in train_loss:
-#     print(_)
-# print(train_loss)
-plt.plot(x, train_loss)
-plt.show()
+# train_loss_list = []
+# with open(temp_file_name) as file:
+#     lines = file.readlines()
+#     for line in lines:
+#         if 'Train_loss' in line:
+#             tokens = line.split(':')
+#             metric = float(tokens[-1].strip())
+#             train_loss_list.append(metric)
+#             # print(line)
+#             # print(metric)
+# x = (np.arange(len(train_loss_list)) + 1) * 5
+# train_loss = np.array(train_loss_list)
+# # for _ in train_loss:
+# #     print(_)
+# # print(train_loss)
+# plt.plot(x, train_loss)
+# plt.show()
 
 # # citation_graph_reconstruction(dataset='pubmed')
 # from dgl.data.citation_graph import PubmedGraphDataset, CiteseerGraphDataset

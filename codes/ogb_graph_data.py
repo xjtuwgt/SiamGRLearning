@@ -19,7 +19,9 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
     'directed':
        'ogbn-arxiv': is a directed graph, representing the citation network (MAG) - Microsoft Academic Graph
        'ogbn-papers100M': dataset is a directed citation graph (MAG)
+    'heterogeneous':
        'ogbn-mag' dataset is a heterogeneous network composed of a subset of the Microsoft Academic Graph
+       directed relations
     :return:
     """
     data = DglNodePropPredDataset(name=dataset, root=ogb_root)
@@ -28,11 +30,22 @@ def ogb_nodeprop_graph_reconstruction(dataset: str):
     n_classes = labels.max().data.item()
     node_features = graph.ndata.pop('feat')
     n_feats = node_features.shape[1]
-    number_of_edges = graph.number_of_edges()
-    edge_type_ids = torch.zeros(number_of_edges, dtype=torch.long)
-    graph = add_relation_ids_to_graph(graph=graph, edge_type_ids=edge_type_ids)
-    nentities, nrelations = graph.number_of_nodes(), 1
+    if dataset in {'ogbn-products', 'ogbn-proteins'}:
+        number_of_edges = graph.number_of_edges()
+        edge_type_ids = torch.zeros(number_of_edges, dtype=torch.long)
+        graph = add_relation_ids_to_graph(graph=graph, edge_type_ids=edge_type_ids)
+        nentities, nrelations = graph.number_of_nodes(), 1
+    elif dataset in {'ogbn-arxiv', 'ogbn-papers100M'}:
+        number_of_edges = graph.number_of_edges()
+        edge_type_ids = torch.zeros(number_of_edges, dtype=torch.long)
+        graph = add_relation_ids_to_graph(graph=graph, edge_type_ids=edge_type_ids)
+        src_nodes, dst_nodes = graph.edges()
+        graph.add_edges(dst_nodes, src_nodes, {'rid': edge_type_ids + 1})
+        nentities, nrelations = graph.number_of_nodes(), 2
+    else:
+        raise 'Dataset {} is not supported'.format(dataset)
     return graph, node_split_idx, node_features, nentities, nrelations, n_classes, n_feats
+
 
 def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
     print('Bi-directional homogeneous graph: {}'.format(dataset))

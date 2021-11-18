@@ -75,13 +75,14 @@ print('Number of relations = {}'.format(number_of_relations))
 print('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
 fanouts = [10, 5, 5]
 
+print(graph.number_of_edges())
+
 
 # ogb_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
 #                                   special_entity2id=special_entity_dict,
 #                                   special_relation2id=special_relation_dict, fanouts=fanouts)
-#
+# #
 # for _ in tqdm(range(ogb_dataset.len)):
 #     ogb_dataset.__getitem__(_)
-#     break
 
 

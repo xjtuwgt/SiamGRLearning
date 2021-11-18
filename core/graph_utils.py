@@ -7,7 +7,8 @@ from dgl.sampling.randomwalks import random_walk
 from torch import Tensor
 from time import time
 import copy
-##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_entities: int):
     """
     :param graph:
@@ -38,6 +39,8 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
     number_of_relations = n_relations
     return graph, number_of_nodes, number_of_relations, special_entity_dict, special_relation_dict
 ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     """
     :param graph:
@@ -47,6 +50,8 @@ def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     graph.edata['rid'] = edge_type_ids
     return graph
 ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, edge_dir: str = 'in',
                               debug=False):
     """
@@ -92,7 +97,9 @@ def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tens
                 node_arw_label_dict[neighbor] = hop + 1
     ##############################################################################################
     return neighbors_dict, node_arw_label_dict, edge_dict
-##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list,
                      edge_dir: str = 'in', debug=False):
     """
@@ -146,8 +153,9 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
     if debug:
         print('Sampling time = {:.4f} seconds'.format(end_time - start_time))
     return neighbors_dict, node_arw_label_dict, edge_dict
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directed:bool = True):
     """
     :param graph: original graph
@@ -171,6 +179,7 @@ def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directe
     subgraph = graph.edge_subgraph(edges=edge_ids)
     return subgraph
 
+
 def single_node_graph_extractor(graph, neighbors_dict: dict):
     """
     :param graph:
@@ -180,6 +189,7 @@ def single_node_graph_extractor(graph, neighbors_dict: dict):
     anchor_ids = neighbors_dict['anchor'][0]
     sub_graph = graph.subgraph(anchor_ids)
     return sub_graph
+
 
 def add_self_loop_in_graph(graph, self_loop_r: int):
     """
@@ -217,6 +227,7 @@ def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_d
     subgraph.add_edges(cls_src, cls_dst, {'rid': cls_relation})
     return subgraph, parent2sub_dict
 
+
 def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, special_relation_dict: dict,
                             node_arw_label_dict: dict, bi_directed: bool = True, self_loop=False, debug=False):
     """
@@ -246,6 +257,7 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     if debug:
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict
+
 
 def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors_dict: dict,
                                       special_relation_dict: dict, edge_dir: str,
@@ -306,6 +318,7 @@ def cls_anchor_sub_graph_augmentation(subgraph, parent2sub_dict: dict, neighbors
         else:
             aug_sub_graph.add_edges(src_nodes, dst_nodes, {'rid': relation_array})
     return aug_sub_graph
+
 
 def sub_graph_multiview_augmentation(subgraph, hop_num: int, edge_dir: str, special_entity_dict: dict,
                                      special_relation_dict: dict):
