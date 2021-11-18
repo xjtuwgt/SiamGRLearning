@@ -86,6 +86,6 @@ def ogb_node_pred_subgraph_data_helper(args):
                                               special_relation_dict=special_relation_dict,
                                               train_batch_size=args.per_gpu_train_batch_size,
                                               val_batch_size=args.eval_batch_size, node_split_idx=node_split_idx,
-                                              graph_type='ogb')
+                                              graph_type=args.graph_type)
 
     return data_helper

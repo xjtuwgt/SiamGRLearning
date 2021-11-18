@@ -94,8 +94,8 @@ def citation_node_pred_subgraph_data_helper(args):
                                               number_of_relations=number_of_relations,
                                               special_entity_dict=special_entity_dict,
                                               special_relation_dict=special_relation_dict,
-                                              train_batch_size=args.per_gpu_train_batch_size,
-                                              val_batch_size=args.eval_batch_size, graph_type='citation')
+                                              train_batch_size=args.per_gpu_train_batch_size, node_split_idx=None,
+                                              val_batch_size=args.eval_batch_size, graph_type=args.graph_type)
     return data_helper
 
 

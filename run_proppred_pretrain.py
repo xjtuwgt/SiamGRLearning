@@ -6,7 +6,7 @@ import sys
 from tensorboardX import SummaryWriter
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
-from codes.citation_graph_data import citation_subgraph_data_helper
+from codes.citation_graph_data import citation_node_pred_subgraph_data_helper
 from codes.gnn_encoder import GraphSimSiamEncoder
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -36,10 +36,10 @@ logging.info('*' * 75)
 citation_pretrain_dataloader, node_features, n_classes = citation_subgraph_pretrain_dataloader(args=args)
 logging.info('Loading pretrained data = {} completed'.format(len(citation_pretrain_dataloader)))
 logging.info('*' * 75)
-citation_data_helper = citation_subgraph_data_helper(args=args)
+citation_data_helper = citation_node_pred_subgraph_data_helper(args=args)
 citation_train_dataloader = citation_data_helper.data_loader(data_type='train')
 logging.info('Loading training data = {} completed'.format(len(citation_train_dataloader)))
-citation_val_dataloader = citation_data_helper.data_loader(data_type='validation')
+citation_val_dataloader = citation_data_helper.data_loader(data_type='valid')
 logging.info('Loading validation data = {} completed'.format(len(citation_val_dataloader)))
 logging.info('*' * 75)
 #########################################################################
