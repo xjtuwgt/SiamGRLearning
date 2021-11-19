@@ -56,10 +56,10 @@ def complete_default_parser(args):
         torch.distributed.init_process_group(backend="nccl")
         args.n_gpu = 1
     args.device = device
-    args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
+    args.pretrain_batch_size = args.per_gpu_pretrain_batch_size * max(1, args.n_gpu)
     # output dir name
     if not args.exp_name:
-        args.exp_name = '_'.join(['lr.' + str(args.learning_rate), 'bs.' + str(args.train_batch_size)])
+        args.exp_name = '_'.join(['lr.' + str(args.learning_rate), 'bs.' + str(args.pretrain_batch_size)])
     args.exp_name = os.path.join(args.output_dir, args.exp_name)
     set_seed(args)
     os.makedirs(args.exp_name, exist_ok=True)
