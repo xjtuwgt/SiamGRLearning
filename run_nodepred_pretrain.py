@@ -130,8 +130,6 @@ for epoch_idx, epoch in enumerate(pretrain_iterator):
                 logging.info('Pre-trained model evaluation at step_{}/epoch_{}'.format(global_step, epoch + 1))
                 for key, value in metrics.items():
                     logging.info('Metric {}: {:.5f}'.format(key, value))
-                    if value < 0.05:
-                        print(p1)
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
