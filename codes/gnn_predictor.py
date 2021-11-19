@@ -2,10 +2,10 @@ from codes.gnn_encoder import GraphSimSiamEncoder
 from torch import nn
 import torch
 
-class NodeClassification(nn.Module):
+class NodeClassificationModel(nn.Module):
     def __init__(self, graph_encoder: GraphSimSiamEncoder, encoder_dim: int, num_of_classes: int,
                  fix_encoder: bool = True):
-        super(NodeClassification, self).__init__()
+        super(NodeClassificationModel, self).__init__()
         self.graph_encoder = graph_encoder
         self.predictor = nn.Linear(in_features=encoder_dim, out_features=num_of_classes)
         self.fix_encoder = fix_encoder

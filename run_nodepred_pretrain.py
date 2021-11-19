@@ -6,9 +6,7 @@ import sys
 from tensorboardX import SummaryWriter
 from codes.argument_parser import default_parser, json_to_argv, complete_default_parser
 from codes.citation_graph_data import citation_subgraph_pretrain_dataloader
-from codes.citation_graph_data import citation_node_pred_subgraph_data_helper
 from codes.ogb_graph_data import ogb_subgraph_pretrain_dataloader
-from codes.ogb_graph_data import ogb_node_pred_subgraph_data_helper
 from codes.gnn_encoder import GraphSimSiamEncoder
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -39,20 +37,12 @@ if args.graph_type == 'citation':
     pretrain_dataloader, node_features, n_classes = citation_subgraph_pretrain_dataloader(args=args)
     logging.info('Loading pretrained data = {} for {} completed'.format(len(pretrain_dataloader), args.graph_type))
     logging.info('*' * 75)
-    node_data_helper = citation_node_pred_subgraph_data_helper(args=args)
 elif args.graph_type == 'ogb':
     pretrain_dataloader, node_features, n_classes = ogb_subgraph_pretrain_dataloader(args=args)
     logging.info('Loading pretrained data = {} for {} completed'.format(len(pretrain_dataloader), args.graph_type))
     logging.info('*' * 75)
-    node_data_helper = ogb_node_pred_subgraph_data_helper(args=args)
 else:
     raise 'Graph type = {} is not supported'.format(args.graph_type)
-
-train_dataloader = node_data_helper.data_loader(data_type='train')
-logging.info('Loading training data = {} completed'.format(len(train_dataloader)))
-val_dataloader = node_data_helper.data_loader(data_type='valid')
-logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
-logging.info('*' * 75)
 #########################################################################
 for key, value in vars(args).items():
     if 'number' in key or 'emb_dim' in key:

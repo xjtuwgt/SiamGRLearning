@@ -117,7 +117,8 @@ def default_parser():
     parser.add_argument('--negative_slope', type=float, default=1.0)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
-    parser.add_argument('--per_gpu_train_batch_size', type=int, default=16)
+    parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)
+    parser.add_argument('--train_batch_size', type=int, default=16)
     # Environment+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--cpu_num', type=int, default=8)
     parser.add_argument("--data_parallel", default='false', type=boolean_string, help="use data parallel or not")
@@ -126,6 +127,8 @@ def default_parser():
     # learning and log ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--seed', type=int, default=43, help="random seed for initialization")
     parser.add_argument("--num_pretrain_epochs", default=10.0, type=float,
+                        help="Total number of pre-training epochs to perform.")
+    parser.add_argument("--num_rain_epochs", default=10.0, type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")

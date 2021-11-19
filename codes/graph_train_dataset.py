@@ -128,7 +128,7 @@ class NodeSubGraphDataset(Dataset):
 
 
 class node_prediction_data_helper(object):
-    def __init__(self, graph, fanouts, number_of_nodes: int, number_of_relations: int,
+    def __init__(self, graph, fanouts, number_of_nodes: int, number_of_relations: int, num_class: int,
                  special_entity_dict: dict, special_relation_dict: dict, train_batch_size: int,
                  val_batch_size: int, graph_type: str, node_split_idx: dict = None):
         self.graph = graph
@@ -139,6 +139,7 @@ class node_prediction_data_helper(object):
         self.special_relation_dict = special_relation_dict
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
+        self.num_class = num_class
         self.graph_type = graph_type
         self.node_split_idx = node_split_idx
 

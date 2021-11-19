@@ -72,7 +72,7 @@ def citation_subgraph_pretrain_dataloader(args):
     citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
                                            special_entity2id=special_entity_dict,
                                            special_relation2id=special_relation_dict, fanouts=fanouts)
-    citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=args.per_gpu_train_batch_size,
+    citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=args.per_gpu_pretrain_batch_size,
                                      shuffle=True, pin_memory=True, drop_last=True,
                                      collate_fn=SubGraphPairDataset.collate_fn)
     return citation_dataloader, node_features, n_classes
@@ -94,6 +94,7 @@ def citation_node_pred_subgraph_data_helper(args):
                                               number_of_relations=number_of_relations,
                                               special_entity_dict=special_entity_dict,
                                               special_relation_dict=special_relation_dict,
-                                              train_batch_size=args.per_gpu_train_batch_size, node_split_idx=None,
+                                              num_class=n_classes,
+                                              train_batch_size=args.train_batch_size, node_split_idx=None,
                                               val_batch_size=args.eval_batch_size, graph_type=args.graph_type)
     return data_helper

@@ -91,7 +91,7 @@ def ogb_subgraph_pretrain_dataloader(args):
     ogb_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
                                       special_entity2id=special_entity_dict,
                                       special_relation2id=special_relation_dict, fanouts=fanouts)
-    ogb_dataloader = DataLoader(dataset=ogb_dataset, batch_size=args.per_gpu_train_batch_size,
+    ogb_dataloader = DataLoader(dataset=ogb_dataset, batch_size=args.per_gpu_pretrain_batch_size,
                                 shuffle=True, pin_memory=True, drop_last=True,
                                 collate_fn=SubGraphPairDataset.collate_fn)
     return ogb_dataloader, node_features, n_classes
@@ -114,7 +114,8 @@ def ogb_node_pred_subgraph_data_helper(args):
                                               number_of_relations=number_of_relations,
                                               special_entity_dict=special_entity_dict,
                                               special_relation_dict=special_relation_dict,
-                                              train_batch_size=args.per_gpu_train_batch_size,
+                                              num_class=n_classes,
+                                              train_batch_size=args.train_batch_size,
                                               val_batch_size=args.eval_batch_size, node_split_idx=node_split_idx,
                                               graph_type=args.graph_type)
 
