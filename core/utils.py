@@ -3,7 +3,7 @@ import os
 import numpy as np
 import torch
 import dgl
-
+IGNORE_IDX = -100
 
 def seed_everything(seed: int) -> int:
     random.seed(seed)

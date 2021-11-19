@@ -8,6 +8,7 @@ from core.gnn_layers import small_init_gain
 from evens import HOME_DATA_FOLDER as ogb_root
 from codes.graph_pretrained_dataset import SubGraphPairDataset
 import logging
+from core.utils import IGNORE_IDX
 
 
 def ogb_nodeprop_graph_reconstruction(dataset: str):
@@ -59,7 +60,7 @@ def ogb_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
                                                                                     n_relations=nrelations,
                                                                                     hop_num=hop_num)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    graph.ndata['label'][-2:] = -1
+    graph.ndata['label'][-2:] = IGNORE_IDX
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     number_of_added_nodes = number_of_nodes - nentities
     logging.info('Added number of nodes = {}'.format(number_of_added_nodes))

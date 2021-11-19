@@ -5,6 +5,7 @@ from codes.graph_train_dataset import node_prediction_data_helper
 from torch.utils.data import DataLoader
 from core.graph_utils import add_relation_ids_to_graph, construct_special_graph_dictionary
 import torch.nn.init as INIT
+from core.utils import IGNORE_IDX
 from core.gnn_layers import small_init_gain
 import logging
 
@@ -37,7 +38,7 @@ def citation_khop_graph_reconstruction(dataset: str, hop_num=5, OON='zero'):
                                                                                     n_relations=nrelations,
                                                                                     hop_num=hop_num)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    graph.ndata['label'][-2:] = -1
+    graph.ndata['label'][-2:] = -IGNORE_IDX
     graph.ndata['val_mask'][-2:] = False
     graph.ndata['train_mask'][-2:] = False
     graph.ndata['test_mask'][-2:] = False

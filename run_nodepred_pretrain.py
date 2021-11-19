@@ -89,7 +89,7 @@ else:
     raise 'Graph type {} is not supported'.format(args.graph_type)
 pretrain_iterator = trange(start_epoch, start_epoch+int(args.num_pretrain_epochs), desc="Epoch",
                            disable=args.local_rank not in [-1, 0])
-for epoch_idx, epoch in enumerate(pretrain_iterator):
+for epoch in pretrain_iterator:
     epoch_iterator = tqdm(pretrain_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     for step, batch in enumerate(epoch_iterator):
         graph_encoder.train()
