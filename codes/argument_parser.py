@@ -83,7 +83,7 @@ def default_parser():
     parser.add_argument('--kg_name', type=str, default='FB15k-237')
     parser.add_argument('--kg_bi_directed', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--citation_name', type=str, default='citeseer')
+    parser.add_argument('--citation_name', type=str, default='cora')
     parser.add_argument('--ogb_node_name', type=str, default='ogbn-arxiv')
     parser.add_argument('--graph_type', type=str, default='citation', choices=["citation", "ogb", "kg"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -137,7 +137,7 @@ def default_parser():
     parser.add_argument("--weight_decay", default=0.0, type=float,
                         help="Weight deay if we apply some.")
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument("--fine_tuned_learning_rate", default=1e-3, type=float,
+    parser.add_argument("--fine_tuned_learning_rate", default=1e-5, type=float,
                         help="The initial learning rate for Adam.")
     parser.add_argument("--fine_tuned_weight_decay", default=1e-8, type=float,
                         help="Weight deay if we apply some.")
