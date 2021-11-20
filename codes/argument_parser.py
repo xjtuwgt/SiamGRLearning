@@ -128,7 +128,7 @@ def default_parser():
     parser.add_argument('--seed', type=int, default=43, help="random seed for initialization")
     parser.add_argument("--num_pretrain_epochs", default=10.0, type=float,
                         help="Total number of pre-training epochs to perform.")
-    parser.add_argument("--num_rain_epochs", default=10.0, type=float,
+    parser.add_argument("--num_train_epochs", default=300.0, type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
@@ -137,9 +137,9 @@ def default_parser():
     parser.add_argument("--weight_decay", default=0.0, type=float,
                         help="Weight deay if we apply some.")
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument("--fine_tuned_learning_rate", default=1e-4, type=float,
+    parser.add_argument("--fine_tuned_learning_rate", default=1e-3, type=float,
                         help="The initial learning rate for Adam.")
-    parser.add_argument("--fine_tuned_weight_decay", default=0.0, type=float,
+    parser.add_argument("--fine_tuned_weight_decay", default=1e-8, type=float,
                         help="Weight deay if we apply some.")
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument("--adam_epsilon", default=1e-8, type=float,

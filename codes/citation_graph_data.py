@@ -90,7 +90,8 @@ def citation_node_pred_subgraph_data_helper(args):
     logging.info('Number of relations = {}'.format(number_of_relations))
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
-    fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    # fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
+    fanouts = [-1 for _ in args.sub_graph_fanouts.split(',')]
     data_helper = node_prediction_data_helper(graph=graph, fanouts=fanouts, number_of_nodes=number_of_nodes,
                                               number_of_relations=number_of_relations,
                                               special_entity_dict=special_entity_dict,
