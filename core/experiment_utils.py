@@ -18,8 +18,6 @@ def train_node_classification(encoder, args):
     logging.info('Number of classes = {}'.format(node_data_helper.num_class))
     train_dataloader = node_data_helper.data_loader(data_type='train')
     logging.info('Loading training data = {} completed'.format(len(train_dataloader)))
-    val_dataloader = node_data_helper.data_loader(data_type='valid')
-    logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
     logging.info('*' * 75)
     # **********************************************************************************
     model = NodeClassificationModel(graph_encoder=encoder, encoder_dim=args.siam_dim,
@@ -32,6 +30,7 @@ def train_node_classification(encoder, args):
     # **********************************************************************************
     start_epoch = 0
     global_step = 0
+    best_accuracy = 0.0
     # **********************************************************************************
     logging.info('Starting fine tuning the model...')
     train_iterator = trange(start_epoch, start_epoch + int(args.num_train_epochs), desc="Epoch",
@@ -54,8 +53,34 @@ def train_node_classification(encoder, args):
             optimizer.step()
             model.zero_grad()
             global_step = global_step + 1
-
-            if global_step % 20 == 0:
-                print(loss.data.item())
-
+            if global_step % args.logging_steps == 0:
+                print('Loss at step {} = {:.5f}'.format(global_step, loss.data.item()))
+        if (epoch_idx + 1) % 10 == 0:
+            eval_acc = evaluate_node_classification_model(model=model, node_data_helper=node_data_helper, args=args)
+            if eval_acc > best_accuracy:
+                best_accuracy = eval_acc
+            print('Best acc = {:.5f}, current acc = {:.5f}'.format(best_accuracy, eval_acc))
     return
+
+
+def evaluate_node_classification_model(model, node_data_helper, args):
+    val_dataloader = node_data_helper.data_loader(data_type='valid')
+    logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
+    epoch_iterator = tqdm(val_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
+    model.eval()
+    total_correct = 0.0
+    total_example = 0.0
+    for step, batch in enumerate(epoch_iterator):
+        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        for key, value in batch.items():
+            if key == 'batch_label':
+                batch[key] = value.to(args.device)
+            else:
+                batch[key] = (value[0].to(args.device), value[1].to(args.device))
+        with torch.no_grad():
+            logits = model.forward(batch)
+            preds = torch.argmax(logits, dim=-1)
+            total_example = total_example + preds.shape[0]
+            total_correct = total_correct + (preds == batch['batch_label']).sum().data.item()
+    eval_acc = total_correct/total_example
+    return eval_acc
