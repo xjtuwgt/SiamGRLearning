@@ -30,7 +30,8 @@ def train_node_classification(encoder, args):
     # **********************************************************************************
     start_epoch = 0
     global_step = 0
-    best_accuracy = 0.0
+    best_valid_accuracy = 0.0
+    test_acc = 0.0
     # **********************************************************************************
     logging.info('Starting fine tuning the model...')
     train_iterator = trange(start_epoch, start_epoch + int(args.num_train_epochs), desc="Epoch",
@@ -54,17 +55,21 @@ def train_node_classification(encoder, args):
             model.zero_grad()
             global_step = global_step + 1
             if global_step % args.logging_steps == 0:
-                print('Loss at step {} = {:.5f}'.format(global_step, loss.data.item()))
+                logging.info('Loss at step {} = {:.5f}'.format(global_step, loss.data.item()))
         if (epoch_idx + 1) % 10 == 0:
             eval_acc = evaluate_node_classification_model(model=model, node_data_helper=node_data_helper, args=args)
-            if eval_acc > best_accuracy:
-                best_accuracy = eval_acc
-            print('Best acc = {:.5f}, current acc = {:.5f}'.format(best_accuracy, eval_acc))
-    return
+            if eval_acc > best_valid_accuracy:
+                best_valid_accuracy = eval_acc
+                test_acc = evaluate_node_classification_model(model=model, node_data_helper=node_data_helper, args=args,
+                                                              data_type='test')
+            logging.info('Best | valid | test accuracy = {:.5f} | {:.5f} | {:.5f}'.format(best_valid_accuracy,
+                                                                                   eval_acc, test_acc))
+    print(best_valid_accuracy, test_acc)
+    return best_valid_accuracy, test_acc
 
 
-def evaluate_node_classification_model(model, node_data_helper, args):
-    val_dataloader = node_data_helper.data_loader(data_type='valid')
+def evaluate_node_classification_model(model, node_data_helper, args, data_type='valid'):
+    val_dataloader = node_data_helper.data_loader(data_type=data_type)
     logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
     epoch_iterator = tqdm(val_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     model.eval()
