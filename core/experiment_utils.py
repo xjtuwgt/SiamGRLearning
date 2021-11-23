@@ -46,7 +46,7 @@ def train_node_classification(encoder, args):
                     batch[key] = value.to(args.device)
                 else:
                     batch[key] = (value[0].to(args.device), value[1].to(args.device), value[2].to(args.device))
-            logits = model.forward(batch, cls_or_anchor='cls')
+            logits = model.forward(batch, cls_or_anchor=args.cls_or_anchor)
             loss = loss_fcn(logits, batch['batch_label'])
             del batch
             # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -83,7 +83,7 @@ def evaluate_node_classification_model(model, node_data_helper, args, data_type=
             else:
                 batch[key] = (value[0].to(args.device), value[1].to(args.device), value[2].to(args.device))
         with torch.no_grad():
-            logits = model.forward(batch)
+            logits = model.forward(batch, cls_or_anchor=args.cls_or_anchor)
             preds = torch.argmax(logits, dim=-1)
             total_example = total_example + preds.shape[0]
             total_correct = total_correct + (preds == batch['batch_label']).sum().data.item()

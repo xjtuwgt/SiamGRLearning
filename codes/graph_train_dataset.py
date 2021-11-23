@@ -143,6 +143,7 @@ class NodePredSubGraphDataset(Dataset):
             else:
                 batch_anchor_id[idx] = _[2] + batch_graph_cls[idx - 1].data.item() + 1
         # +++++++++++++++++++++++++++++++++++++++
+        # 'cls' for graph level prediction and 'anchor' for node/edge level prediction
         return {'batch_graph': (batch_graphs, batch_graph_cls, batch_anchor_id), 'batch_label': batch_label}
 
 

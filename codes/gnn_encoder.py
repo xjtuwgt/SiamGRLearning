@@ -97,7 +97,7 @@ class GraphSimSiamEncoder(nn.Module):
         self.graph_siam_encoder = SimSiam(base_encoder=self.graph_encoder,
                                           base_encoder_out_dim=self.config.hidden_dim,
                                           dim=self.config.siam_dim,
-                                          pred_dim=self.config.siam_pred_dim)
+                                          proj_dim=self.config.siam_proj_dim)
 
     def init(self, graph_node_emb: Tensor = None, graph_rel_emb: Tensor = None, freeze=False):
         self.graph_encoder.init(graph_node_emb=graph_node_emb, graph_rel_emb=graph_rel_emb, freeze=freeze)
