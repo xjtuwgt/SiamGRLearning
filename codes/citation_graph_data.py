@@ -1,6 +1,6 @@
 import torch
 from dgl.data import CoraGraphDataset, CiteseerGraphDataset, PubmedGraphDataset
-from codes.graph_pretrained_dataset import SubGraphPairDataset
+from codes.graph_pretrained_dataset import NodeSubGraphPairDataset
 from codes.graph_train_dataset import node_prediction_data_helper
 from torch.utils.data import DataLoader
 from core.graph_utils import add_relation_ids_to_graph, construct_special_graph_dictionary
@@ -70,12 +70,12 @@ def citation_subgraph_pretrain_dataloader(args):
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
     fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
-    citation_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+    citation_dataset = NodeSubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
                                            special_entity2id=special_entity_dict,
                                            special_relation2id=special_relation_dict, fanouts=fanouts)
     citation_dataloader = DataLoader(dataset=citation_dataset, batch_size=args.per_gpu_pretrain_batch_size,
                                      shuffle=True, pin_memory=True, drop_last=True,
-                                     collate_fn=SubGraphPairDataset.collate_fn)
+                                     collate_fn=NodeSubGraphPairDataset.collate_fn)
     return citation_dataloader, node_features, n_classes
 
 

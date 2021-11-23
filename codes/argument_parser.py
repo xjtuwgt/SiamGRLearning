@@ -100,18 +100,18 @@ def default_parser():
     parser.add_argument('--node_number', type=int, default=300)
     parser.add_argument('--node_emb_dim', type=int, default=300)
     parser.add_argument('--arw_pos_emb_dim', type=int, default=300)
-    parser.add_argument('--siam_dim', type=int, default=1024)
-    parser.add_argument('--siam_proj_dim', type=int, default=512)
+    parser.add_argument('--siam_dim', type=int, default=512)
+    parser.add_argument('--siam_proj_dim', type=int, default=256)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--feat_drop', type=float, default=0.25)
+    parser.add_argument('--feat_drop', type=float, default=0.35)
     parser.add_argument('--attn_drop', type=float, default=0.4)
     parser.add_argument('--residual', type=boolean_string, default='true')
     parser.add_argument('--diff_head_tail', type=boolean_string, default='false')
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
     parser.add_argument('--stanford', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--gnn_hop_num', type=int, default=5)
-    parser.add_argument('--alpha', type=float, default=0.1)
+    parser.add_argument('--gnn_hop_num', type=int, default=4)
+    parser.add_argument('--alpha', type=float, default=0.15)
     parser.add_argument('--hidden_dim', type=int, default=512)
     parser.add_argument('--head_num', type=int, default=8)
     parser.add_argument('--layers', type=int, default=6)
@@ -119,7 +119,7 @@ def default_parser():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
     parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)
-    parser.add_argument('--train_batch_size', type=int, default=8)
+    parser.add_argument('--train_batch_size', type=int, default=4)
     # Environment+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--cpu_num', type=int, default=8)
     parser.add_argument("--data_parallel", default='false', type=boolean_string, help="use data parallel or not")

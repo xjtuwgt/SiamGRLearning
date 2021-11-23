@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from codes.graph_train_dataset import node_prediction_data_helper
 from core.gnn_layers import small_init_gain
 from evens import HOME_DATA_FOLDER as ogb_root
-from codes.graph_pretrained_dataset import SubGraphPairDataset
+from codes.graph_pretrained_dataset import NodeSubGraphPairDataset
 import logging
 from core.utils import IGNORE_IDX
 
@@ -89,12 +89,12 @@ def ogb_subgraph_pretrain_dataloader(args):
     args.relation_number = number_of_relations
     logging.info('Number of nodes with 0 in-degree = {}'.format((graph.in_degrees() == 0).sum()))
     fanouts = [int(_) for _ in args.sub_graph_fanouts.split(',')]
-    ogb_dataset = SubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
+    ogb_dataset = NodeSubGraphPairDataset(graph=graph, nentity=number_of_nodes, nrelation=number_of_relations,
                                       special_entity2id=special_entity_dict,
                                       special_relation2id=special_relation_dict, fanouts=fanouts)
     ogb_dataloader = DataLoader(dataset=ogb_dataset, batch_size=args.per_gpu_pretrain_batch_size,
                                 shuffle=True, pin_memory=True, drop_last=True,
-                                collate_fn=SubGraphPairDataset.collate_fn)
+                                collate_fn=NodeSubGraphPairDataset.collate_fn)
     return ogb_dataloader, node_features, n_classes
 
 
