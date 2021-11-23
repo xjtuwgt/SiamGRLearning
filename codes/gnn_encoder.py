@@ -61,8 +61,8 @@ class GDTEncoder(nn.Module):
         if self.config.arw_position:
             self.arw_position_embed_layer.init()
 
-    def forward(self, batch_g_pair):
-        batch_g, batch_cls = batch_g_pair
+    def forward(self, batch_g_pair, cls_or_anchor='cls'):
+        batch_g = batch_g_pair[0]
         ent_ids = batch_g.ndata['nid']
         rel_ids = batch_g.edata['rid']
         ent_features = self.node_embed_layer(ent_ids)
@@ -78,8 +78,14 @@ class GDTEncoder(nn.Module):
                     h = self.graph_encoder[_](batch_g, h, rel_features)
                 else:
                     h = self.graph_encoder[_](batch_g, h)
-            graph_cls_embed = h[batch_cls]
-            return graph_cls_embed
+            if cls_or_anchor == 'cls':
+                batch_node_ids = batch_g_pair[1]
+            elif cls_or_anchor == 'anchor':
+                batch_node_ids = batch_g_pair[2]
+            else:
+                raise '{} is not supported'.format(cls_or_anchor)
+            batch_graph_embed = h[batch_node_ids]
+            return batch_graph_embed
 
 
 class GraphSimSiamEncoder(nn.Module):
@@ -96,12 +102,12 @@ class GraphSimSiamEncoder(nn.Module):
     def init(self, graph_node_emb: Tensor = None, graph_rel_emb: Tensor = None, freeze=False):
         self.graph_encoder.init(graph_node_emb=graph_node_emb, graph_rel_emb=graph_rel_emb, freeze=freeze)
 
-    def forward(self, batch):
-        p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'])
+    def forward(self, batch, cls_or_anchor='cls'):
+        p1, p2, z1, z2 = self.graph_siam_encoder(batch['batch_graph_1'], batch['batch_graph_2'], cls_or_anchor)
         return p1, p2, z1, z2
 
-    def encode(self, batch):
-        embed = self.graph_siam_encoder.encode(x=batch['batch_graph'])
+    def encode(self, batch, cls_or_anchor='cls'):
+        embed = self.graph_siam_encoder.encode(x=batch['batch_graph'], cls_or_anchor=cls_or_anchor)
         return embed
 
     def pretrain_optimizer_scheduler(self, total_steps):

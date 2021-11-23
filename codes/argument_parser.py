@@ -90,7 +90,7 @@ def default_parser():
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
     parser.add_argument('--sub_graph_edge_dir', type=str, default='in')
-    parser.add_argument('--arw_position', type=boolean_string, default='true')
+    parser.add_argument('--arw_position', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

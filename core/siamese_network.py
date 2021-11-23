@@ -13,8 +13,8 @@ class SimSiam(nn.Module):
         super(SimSiam, self).__init__()
         # create the encoder = base_encoder + a 3-layer projector
         self.prev_dim = base_encoder_out_dim
-        self.encoder = nn.Sequential(base_encoder,
-                                     nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+        self.graph_encoder = base_encoder
+        self.mapper = nn.Sequential(nn.Linear(self.prev_dim, self.prev_dim, bias=False),
                                      nn.BatchNorm1d(self.prev_dim),
                                      nn.ReLU(inplace=True),  # first layer
                                      nn.Linear(self.prev_dim, self.prev_dim, bias=False),
@@ -28,23 +28,27 @@ class SimSiam(nn.Module):
                                        nn.ReLU(inplace=True),  # hidden layer
                                        nn.Linear(pred_dim, dim))  # output layer
 
-    def forward(self, x1, x2):
+    def forward(self, x1, x2, cls_or_anchor='cls'):
         """
         Input:
             x1: first views of input
             x2: second views of input
+            cls_or_anchor: 'cls' or 'anchor'
         Output:
             p1, p2, z1, z2: predictors and targets of the network
             See Sec. 3 of https://arxiv.org/abs/2011.10566 for detailed notations
         """
         # compute features for one view
-        z1 = self.encoder(x1)  # NxC
-        z2 = self.encoder(x2)  # NxC
+        g1 = self.graph_encoder(x1, cls_or_anchor)
+        g2 = self.graph_encoder(x2, cls_or_anchor)
+        z1 = self.mapper(g1)  # NxC
+        z2 = self.mapper(g2)  # NxC
 
         p1 = self.projector(z1)  # NxC
         p2 = self.projector(z2)  # NxC
         return p1, p2, z1.detach(), z2.detach()
 
-    def encode(self, x):
-        z = self.encoder(x)
+    def encode(self, x, cls_or_anchor='cls'):
+        g = self.graph_encoder(x, cls_or_anchor)
+        z = self.mapper(g)
         return z

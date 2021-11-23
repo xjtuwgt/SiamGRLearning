@@ -11,15 +11,16 @@ class NodeClassificationModel(nn.Module):
         self.fix_encoder = fix_encoder
 
     @staticmethod
-    def get_representation(sub_model: GraphSimSiamEncoder, batch: dict, fix_encoder: bool=True):
+    def get_representation(sub_model: GraphSimSiamEncoder, batch: dict, cls_or_anchor: str, fix_encoder: bool = True):
         if fix_encoder:
             with torch.no_grad():
-                graph_emb = sub_model.encode(batch=batch)
+                graph_emb = sub_model.encode(batch=batch, cls_or_anchor=cls_or_anchor)
         else:
-            graph_emb = sub_model.encode(batch=batch)
+            graph_emb = sub_model.encode(batch=batch, cls_or_anchor=cls_or_anchor)
         return graph_emb
 
-    def forward(self, batch):
-        graph_embed = self.get_representation(sub_model=self.encoder, batch=batch, fix_encoder=self.fix_encoder)
+    def forward(self, batch, cls_or_anchor):
+        graph_embed = self.get_representation(sub_model=self.encoder, batch=batch,
+                                              fix_encoder=self.fix_encoder, cls_or_anchor=cls_or_anchor)
         pred_scores = self.predictor(graph_embed)
         return pred_scores

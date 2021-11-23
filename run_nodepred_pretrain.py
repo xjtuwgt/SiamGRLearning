@@ -99,7 +99,7 @@ train_node_classification(encoder=graph_encoder, args=args)
 #         graph_encoder.train()
 #         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #         for key, value in batch.items():
-#             batch[key] = (value[0].to(args.device), value[1].to(args.device))
+#             batch[key] = (value[0].to(args.device), value[1].to(args.device), value[2].to(args.device))
 #         p1, p2, z1, z2 = graph_encoder.forward(batch)
 #         loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5 + 1
 #         del batch
