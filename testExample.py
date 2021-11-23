@@ -10,7 +10,7 @@ import dgl
 from core.kg_utils import KGDataset, knowledge_graph_construction_from_triples, kg_data_path_collection
 from core.graph_utils import sub_graph_neighbor_sample, sub_graph_random_walk_sample, cls_sub_graph_extractor
 from codes.citation_graph_data import citation_graph_reconstruction, citation_khop_graph_reconstruction
-from codes.graph_pretrained_dataset import SubGraphPairDataset
+from codes.graph_pretrained_dataset import NodeSubGraphPairDataset
 from codes.ogb_graph_data import ogb_khop_graph_reconstruction
 from codes.graph_train_dataset import NodePredSubGraphDataset, NodeSubGraphDataset
 from codes.knowledge_graph_data import knowledge_graph_khop_reconstruction
@@ -70,7 +70,7 @@ citation_dataset = NodePredSubGraphDataset(graph=graph, nentity=number_of_nodes,
                                    fanouts=fanouts, graph_type='citation', data_type='train')
 citation_dataloader = DataLoader(dataset=citation_dataset,
                                  batch_size=16,
-                                 collate_fn=SubGraphPairDataset.collate_fn)
+                                 collate_fn=NodeSubGraphPairDataset.collate_fn)
 for _ in tqdm(range(citation_dataset.len)):
     citation_dataset.__getitem__(_)
 

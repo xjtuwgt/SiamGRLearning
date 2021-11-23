@@ -91,7 +91,7 @@ def default_parser():
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
     parser.add_argument('--sub_graph_edge_dir', type=str, default='in')
     parser.add_argument('--arw_position', type=boolean_string, default='false')
-    parser.add_argument('--cls_or_anchor', type=str, default='cls', choices=["cls", "anchor"])
+    parser.add_argument('--cls_or_anchor', type=str, default='anchor', choices=["cls", "anchor"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -7,7 +7,7 @@ from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor,
     cls_anchor_sub_graph_augmentation
 
 
-class SubGraphPairDataset(Dataset):
+class NodeSubGraphPairDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, bi_directed=True, edge_dir='in'):
         assert len(fanouts) > 0
@@ -46,17 +46,26 @@ class SubGraphPairDataset(Dataset):
         aug_subgraph = cls_anchor_sub_graph_augmentation(subgraph=subgraph, parent2sub_dict=parent2sub_dict,
                                                          neighbors_dict=neighbors_dict, edge_dir=self.edge_dir,
                                                          special_relation_dict=self.special_relation2id)
-        return subgraph, aug_subgraph
+
+        sub_anchor_id = parent2sub_dict[idx.data.item()]
+        assert subgraph.number_of_nodes() == aug_subgraph.number_of_nodes()
+        return subgraph, aug_subgraph, sub_anchor_id
 
     @staticmethod
     def collate_fn(data):
-        assert len(data[0]) == 2
+        assert len(data[0]) == 3
         batch_graphs_1 = dgl.batch([_[0] for _ in data])
-        batch_graph_1_cls = torch.as_tensor([_[0].number_of_nodes() for _ in data], dtype=torch.long)
-        batch_graph_1_cls = torch.cumsum(batch_graph_1_cls, dim=0) - 1
-
-        batch_graph_2_cls = torch.as_tensor([_[1].number_of_nodes() for _ in data], dtype=torch.long)
-        batch_graph_2_cls = torch.cumsum(batch_graph_2_cls, dim=0) - 1
         batch_graphs_2 = dgl.batch([_[1] for _ in data])
-        return {'batch_graph_1': (batch_graphs_1, batch_graph_1_cls),
-                'batch_graph_2': (batch_graphs_2, batch_graph_2_cls)}
+
+        batch_graph_cls = torch.as_tensor([_[0].number_of_nodes() for _ in data], dtype=torch.long)
+        batch_graph_cls = torch.cumsum(batch_graph_cls, dim=0) - 1
+        # ++++++++++++++++++++++++++++++++++++++++
+        batch_anchor_id = torch.zeros(len(data), dtype=torch.long)
+        for idx, _ in enumerate(data):
+            if idx == 0:
+                batch_anchor_id[idx] = _[2]
+            else:
+                batch_anchor_id[idx] = _[2] + batch_graph_cls[idx - 1].data.item() + 1
+        # +++++++++++++++++++++++++++++++++++++++
+        return {'batch_graph_1': (batch_graphs_1, batch_graph_cls, batch_anchor_id),
+                'batch_graph_2': (batch_graphs_2, batch_graph_cls, batch_anchor_id)}
