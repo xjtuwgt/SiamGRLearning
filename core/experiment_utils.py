@@ -70,7 +70,7 @@ def train_node_classification(encoder, args):
 
 def evaluate_node_classification_model(model, node_data_helper, args, data_type='valid'):
     val_dataloader = node_data_helper.data_loader(data_type=data_type)
-    logging.info('Loading validation data = {} completed'.format(len(val_dataloader)))
+    logging.info('Loading {} data = {} completed'.format(data_type, len(val_dataloader)))
     epoch_iterator = tqdm(val_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
     model.eval()
     total_correct = 0.0
