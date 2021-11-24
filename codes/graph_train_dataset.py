@@ -85,7 +85,7 @@ def ogb_train_valid_test(node_split_idx: dict, data_type: str):
 class NodePredSubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, data_type: str, graph_type: str,
-                 bi_directed: bool = True, self_loop: bool = True, edge_dir: str = 'in', node_split_idx: dict = None):
+                 bi_directed: bool = True, self_loop: bool = False, edge_dir: str = 'in', node_split_idx: dict = None):
         assert len(fanouts) > 0 and (data_type in {'train', 'valid', 'test'})
         assert graph_type in {'citation', 'ogb'}
         self.fanouts = fanouts  # list of int == number of hops for sampling
@@ -152,7 +152,7 @@ class NodePredSubGraphDataset(Dataset):
 class node_prediction_data_helper(object):
     def __init__(self, graph, fanouts, number_of_nodes: int, number_of_relations: int, num_class: int,
                  special_entity_dict: dict, special_relation_dict: dict, train_batch_size: int,
-                 val_batch_size: int, graph_type: str, edge_dir: str = 'in', self_loop: bool = True,
+                 val_batch_size: int, graph_type: str, edge_dir: str = 'in', self_loop: bool = False,
                  node_split_idx: dict = None):
         self.graph = graph
         self.fanouts = fanouts
