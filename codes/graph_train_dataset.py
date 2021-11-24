@@ -85,7 +85,7 @@ def ogb_train_valid_test(node_split_idx: dict, data_type: str):
 class NodePredSubGraphDataset(Dataset):
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, data_type: str, graph_type: str,
-                 bi_directed=True, edge_dir='in', node_split_idx: dict = None):
+                 bi_directed: bool = True, self_loop: bool = True, edge_dir: str = 'in', node_split_idx: dict = None):
         assert len(fanouts) > 0 and (data_type in {'train', 'valid', 'test'})
         assert graph_type in {'citation', 'ogb'}
         self.fanouts = fanouts  # list of int == number of hops for sampling
@@ -104,6 +104,7 @@ class NodePredSubGraphDataset(Dataset):
         self.nentity, self.nrelation = nentity, nrelation
         self.bi_directed = bi_directed
         self.edge_dir = edge_dir  # "in", "out"
+        self.self_loop = self_loop
         self.special_entity2id, self.special_relation2id = special_entity2id, special_relation2id
 
     def __len__(self):
@@ -123,6 +124,7 @@ class NodePredSubGraphDataset(Dataset):
                                                             neighbors_dict=neighbors_dict,
                                                             special_relation_dict=self.special_relation2id,
                                                             node_arw_label_dict=node_arw_label_dict,
+                                                            self_loop=self.self_loop,
                                                             bi_directed=self.bi_directed, debug=False)
         sub_anchor_id = parent2sub_dict[node_idx.data.item()]
         class_label = self.g.ndata['label'][node_idx]
@@ -150,7 +152,8 @@ class NodePredSubGraphDataset(Dataset):
 class node_prediction_data_helper(object):
     def __init__(self, graph, fanouts, number_of_nodes: int, number_of_relations: int, num_class: int,
                  special_entity_dict: dict, special_relation_dict: dict, train_batch_size: int,
-                 val_batch_size: int, graph_type: str, node_split_idx: dict = None):
+                 val_batch_size: int, graph_type: str, edge_dir: str = 'in', self_loop: bool = True,
+                 node_split_idx: dict = None):
         self.graph = graph
         self.fanouts = fanouts
         self.number_of_nodes = number_of_nodes
@@ -162,14 +165,17 @@ class node_prediction_data_helper(object):
         self.num_class = num_class
         self.graph_type = graph_type
         self.node_split_idx = node_split_idx
+        self.self_loop = self_loop
+        self.edge_dir = edge_dir
 
     def data_loader(self, data_type):
         dataset = NodePredSubGraphDataset(graph=self.graph, nentity=self.number_of_nodes,
-                                      nrelation=self.number_of_relations,
-                                      special_entity2id=self.special_entity_dict,
-                                      special_relation2id=self.special_relation_dict,
-                                      data_type=data_type, graph_type=self.graph_type,
-                                      fanouts=self.fanouts, node_split_idx=self.node_split_idx)
+                                          nrelation=self.number_of_relations,
+                                          special_entity2id=self.special_entity_dict,
+                                          special_relation2id=self.special_relation_dict,
+                                          data_type=data_type, graph_type=self.graph_type,
+                                          edge_dir=self.edge_dir, self_loop=self.self_loop,
+                                          fanouts=self.fanouts, node_split_idx=self.node_split_idx)
         if data_type in {'train'}:
             batch_size = self.train_batch_size
             shuffle = True

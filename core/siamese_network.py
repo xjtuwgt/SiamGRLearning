@@ -14,17 +14,21 @@ class SimSiam(nn.Module):
         # create the encoder = base_encoder + a 3-layer projector
         self.prev_dim = base_encoder_out_dim
         self.graph_encoder = base_encoder
-        self.mapper = nn.Sequential(nn.Linear(self.prev_dim, self.prev_dim, bias=False),
-                                    nn.BatchNorm1d(self.prev_dim),
-                                    nn.ReLU(inplace=True),  # first layer
-                                    nn.Linear(self.prev_dim, self.prev_dim, bias=False),
-                                    nn.BatchNorm1d(self.prev_dim),
+        self.mapper = nn.Sequential(
+                                    # nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+                                    # nn.BatchNorm1d(self.prev_dim),
+                                    # nn.ReLU(inplace=True),  # first layer
+                                    # nn.Linear(self.prev_dim, self.prev_dim, bias=False),
+                                    # nn.BatchNorm1d(self.prev_dim),
                                     nn.ReLU(inplace=True),  # second layer
                                     nn.Linear(self.prev_dim, dim, bias=False),
-                                    nn.BatchNorm1d(dim, affine=False))  # output layer
+                                    # nn.BatchNorm1d(dim, affine=False)
+                                    nn.LayerNorm(dim),
+                                    )  # output layer
         # build a 2-layer projection
         self.projector = nn.Sequential(nn.Linear(dim, proj_dim, bias=False),
-                                       nn.BatchNorm1d(proj_dim),
+                                       # nn.BatchNorm1d(proj_dim),
+                                       nn.LayerNorm(proj_dim),
                                        nn.ReLU(inplace=True),  # hidden layer
                                        nn.Linear(proj_dim, dim))  # output layer
 
