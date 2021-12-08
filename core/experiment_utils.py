@@ -20,7 +20,7 @@ def train_node_classification(encoder, args):
     logging.info('Loading training data = {} completed'.format(len(train_dataloader)))
     logging.info('*' * 75)
     # **********************************************************************************
-    model = NodeClassificationModel(graph_encoder=encoder, encoder_dim=args.siam_dim,
+    model = NodeClassificationModel(graph_encoder=encoder, encoder_dim=args.hidden_dim,
                                     num_of_classes=node_data_helper.num_class, fix_encoder=False)
     model.to(args.device)
     # **********************************************************************************
