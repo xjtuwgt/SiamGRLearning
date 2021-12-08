@@ -89,36 +89,36 @@ def default_parser():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
-    parser.add_argument('--sub_graph_edge_dir', type=str, default='in')
+    parser.add_argument('--sub_graph_edge_dir', type=str, default='out', choices=['in', 'out'])
     parser.add_argument('--arw_position', type=boolean_string, default='true')
     parser.add_argument('--cls_or_anchor', type=str, default='anchor', choices=["cls", "anchor"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--relation_number', type=int, default=2)
-    parser.add_argument('--relation_emb_dim', type=int, default=256)
+    parser.add_argument('--relation_emb_dim', type=int, default=300)
     parser.add_argument('--node_number', type=int, default=300)
     parser.add_argument('--node_emb_dim', type=int, default=300)
     parser.add_argument('--arw_pos_emb_dim', type=int, default=300)
     parser.add_argument('--siam_dim', type=int, default=2048)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--feat_drop', type=float, default=0.25)
-    parser.add_argument('--attn_drop', type=float, default=0.25)
+    parser.add_argument('--attn_drop', type=float, default=0.4)
     parser.add_argument('--residual', type=boolean_string, default='true')
     parser.add_argument('--diff_head_tail', type=boolean_string, default='false')
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
     parser.add_argument('--stanford', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--gnn_hop_num', type=int, default=4)
+    parser.add_argument('--gnn_hop_num', type=int, default=5)
     parser.add_argument('--alpha', type=float, default=0.1)
     parser.add_argument('--hidden_dim', type=int, default=512)
     parser.add_argument('--head_num', type=int, default=8)
-    parser.add_argument('--layers', type=int, default=3)
+    parser.add_argument('--layers', type=int, default=6)
     parser.add_argument('--negative_slope', type=float, default=0.2)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
     parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)
-    parser.add_argument('--train_batch_size', type=int, default=4)
+    parser.add_argument('--train_batch_size', type=int, default=8)
     # Environment+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--cpu_num', type=int, default=8)
     parser.add_argument("--data_parallel", default='false', type=boolean_string, help="use data parallel or not")
@@ -134,7 +134,7 @@ def default_parser():
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
     parser.add_argument("--learning_rate", default=1e-4, type=float,
                         help="The initial learning rate for Adam.")
-    parser.add_argument("--weight_decay", default=0.0001, type=float,
+    parser.add_argument("--weight_decay", default=0.001, type=float,
                         help="Weight deay if we apply some.")
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument("--fine_tuned_learning_rate", default=1e-5, type=float,

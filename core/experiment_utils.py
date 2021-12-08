@@ -56,7 +56,7 @@ def train_node_classification(encoder, args):
             global_step = global_step + 1
             if global_step % args.logging_steps == 0:
                 logging.info('Loss at step {} = {:.5f}'.format(global_step, loss.data.item()))
-        if (epoch_idx + 1) % 10 == 0:
+        if (epoch_idx + 1) % 2 == 0:
             eval_acc = evaluate_node_classification_model(model=model, node_data_helper=node_data_helper, args=args)
             if eval_acc > best_valid_accuracy:
                 best_valid_accuracy = eval_acc

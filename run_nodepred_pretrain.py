@@ -51,7 +51,7 @@ for key, value in vars(args).items():
 logging.info('*' * 75)
 #########################################################################
 graph_encoder = GraphSimSiamEncoder(config=args)
-graph_encoder.init(graph_node_emb=node_features)
+graph_encoder.init(graph_node_emb=node_features, freeze=True)
 graph_encoder.to(args.device)
 # #########################################################################
 # # Print model information
