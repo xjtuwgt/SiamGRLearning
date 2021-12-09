@@ -62,9 +62,9 @@ def train_node_classification(encoder, args):
                 best_valid_accuracy = eval_acc
                 test_acc = evaluate_node_classification_model(model=model, node_data_helper=node_data_helper, args=args,
                                                               data_type='test')
-            logging.info('Best | valid | test accuracy = {:.5f} | {:.5f} | {:.5f}'.format(best_valid_accuracy,
-                                                                                   eval_acc, test_acc))
-    print(best_valid_accuracy, test_acc)
+            logging.info('Best valid | current valid | test accuracy = {:.5f} | {:.5f} | {:.5f}'.format(
+                best_valid_accuracy, eval_acc, test_acc))
+    logging.info('Best valid | test accuracy = {:.5f} | {:.5f}'.format(best_valid_accuracy, test_acc))
     return best_valid_accuracy, test_acc
 
 

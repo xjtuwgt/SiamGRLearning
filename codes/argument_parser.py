@@ -83,15 +83,15 @@ def default_parser():
     parser.add_argument('--kg_name', type=str, default='FB15k-237')
     parser.add_argument('--kg_bi_directed', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--citation_name', type=str, default='citeseer')
+    parser.add_argument('--citation_name', type=str, default='cora')
     parser.add_argument('--ogb_node_name', type=str, default='ogbn-arxiv')
     parser.add_argument('--graph_type', type=str, default='citation', choices=["citation", "ogb", "kg"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
-    parser.add_argument('--sub_graph_edge_dir', type=str, default='out', choices=['in', 'out'])
+    parser.add_argument('--sub_graph_edge_dir', type=str, default='in', choices=['in', 'out'])
     parser.add_argument('--arw_position', type=boolean_string, default='true')
-    parser.add_argument('--cls_or_anchor', type=str, default='anchor', choices=["cls", "anchor"])
+    parser.add_argument('--cls_or_anchor', type=str, default='cls', choices=["cls", "anchor"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -103,38 +103,38 @@ def default_parser():
     parser.add_argument('--siam_dim', type=int, default=2048)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--feat_drop', type=float, default=0.25)
-    parser.add_argument('--attn_drop', type=float, default=0.4)
+    parser.add_argument('--attn_drop', type=float, default=0.25)
     parser.add_argument('--residual', type=boolean_string, default='true')
     parser.add_argument('--diff_head_tail', type=boolean_string, default='false')
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
     parser.add_argument('--stanford', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--gnn_hop_num', type=int, default=5)
+    parser.add_argument('--gnn_hop_num', type=int, default=3)
     parser.add_argument('--alpha', type=float, default=0.1)
-    parser.add_argument('--hidden_dim', type=int, default=512)
+    parser.add_argument('--hidden_dim', type=int, default=128)
     parser.add_argument('--head_num', type=int, default=8)
     parser.add_argument('--layers', type=int, default=6)
     parser.add_argument('--negative_slope', type=float, default=0.2)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
     parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)
-    parser.add_argument('--train_batch_size', type=int, default=8)
+    parser.add_argument('--train_batch_size', type=int, default=16)
     # Environment+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--cpu_num', type=int, default=8)
     parser.add_argument("--data_parallel", default='false', type=boolean_string, help="use data parallel or not")
     parser.add_argument("--gpu_id", default=None, type=str, help="GPU id")
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     # learning and log ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--seed', type=int, default=43, help="random seed for initialization")
-    parser.add_argument("--num_pretrain_epochs", default=10.0, type=float,
+    parser.add_argument('--seed', type=int, default=45, help="random seed for initialization")
+    parser.add_argument("--num_pretrain_epochs", default=150.0, type=float,
                         help="Total number of pre-training epochs to perform.")
-    parser.add_argument("--num_train_epochs", default=300.0, type=float,
+    parser.add_argument("--num_train_epochs", default=100.0, type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
     parser.add_argument("--learning_rate", default=1e-4, type=float,
                         help="The initial learning rate for Adam.")
-    parser.add_argument("--weight_decay", default=0.001, type=float,
+    parser.add_argument("--weight_decay", default=0.0000001, type=float,
                         help="Weight deay if we apply some.")
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument("--fine_tuned_learning_rate", default=1e-5, type=float,

@@ -4,10 +4,13 @@ import dgl
 from numpy import random
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor
+from core.graph_utils import sub_graph_neighbor_sample, cls_sub_graph_extractor, cls_anchor_sub_graph_augmentation
 
 
 class NodeSubGraphDataset(Dataset):
+    """
+    Graph representation learning without node labels
+    """
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, bi_directed=True, edge_dir='in'):
         assert len(fanouts) > 0
@@ -83,9 +86,13 @@ def ogb_train_valid_test(node_split_idx: dict, data_type: str):
 
 
 class NodePredSubGraphDataset(Dataset):
+    """
+    Graph representation learning with node labels
+    """
     def __init__(self, graph: DGLHeteroGraph, nentity: int, nrelation: int, fanouts: list,
                  special_entity2id: dict, special_relation2id: dict, data_type: str, graph_type: str,
-                 bi_directed: bool = True, self_loop: bool = False, edge_dir: str = 'in', node_split_idx: dict = None):
+                 bi_directed: bool = True, self_loop: bool = False, edge_dir: str = 'in',
+                 node_split_idx: dict = None):
         assert len(fanouts) > 0 and (data_type in {'train', 'valid', 'test'})
         assert graph_type in {'citation', 'ogb'}
         self.fanouts = fanouts  # list of int == number of hops for sampling
@@ -126,6 +133,12 @@ class NodePredSubGraphDataset(Dataset):
                                                             node_arw_label_dict=node_arw_label_dict,
                                                             self_loop=self.self_loop,
                                                             bi_directed=self.bi_directed, debug=False)
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # subgraph = cls_anchor_sub_graph_augmentation(subgraph=subgraph, parent2sub_dict=parent2sub_dict,
+        #                                              neighbors_dict=neighbors_dict,
+        #                                              special_relation_dict=self.special_relation2id,
+        #                                              edge_dir=self.edge_dir, bi_directed=self.bi_directed)
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         sub_anchor_id = parent2sub_dict[node_idx.data.item()]
         class_label = self.g.ndata['label'][node_idx]
         return subgraph, class_label, sub_anchor_id

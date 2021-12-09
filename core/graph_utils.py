@@ -41,8 +41,6 @@ def construct_special_graph_dictionary(graph, hop_num: int, n_relations: int, n_
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
     """
     :param graph:
@@ -54,8 +52,6 @@ def add_relation_ids_to_graph(graph, edge_type_ids: Tensor):
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list, edge_dir: str = 'in',
                               debug=False):
     """
@@ -105,8 +101,6 @@ def sub_graph_neighbor_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tens
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: Tensor, fanouts: list,
                                  edge_dir: str = 'in', debug=False):
     """
@@ -163,8 +157,6 @@ def sub_graph_random_walk_sample(graph, anchor_node_ids: Tensor, cls_node_ids: T
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 def sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, bi_directed: bool = True):
     """
     :param graph: original graph
