@@ -515,7 +515,7 @@ if __name__ == '__main__':
                 print((a==0).sum(), graph.number_of_edges() * self._num_heads)
                 graph.edata['ta'] = a
                 a_mask, a_top_sum = top_kp_attention(graph=graph, attn_scores=a, top_k=True)
-                n_a = top_kp_attn_normalization(graph=graph, attn_scores=a, attn_mask=a_mask, topk_sum=a_top_sum)
+                n_a = top_kp_attn_normalization(graph=graph, attn_scores=a, attn_mask=a_mask, top_k_sum=a_top_sum)
                 print((n_a == 0).sum(), graph.number_of_edges() * self._num_heads)
 
                 graph.edata['a'] = self.attn_drop(a)
