@@ -5,6 +5,7 @@ import torch
 import dgl
 IGNORE_IDX = -100
 
+
 def seed_everything(seed: int) -> int:
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)

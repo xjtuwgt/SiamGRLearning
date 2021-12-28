@@ -90,7 +90,7 @@ def default_parser():
     parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
     parser.add_argument('--sub_graph_edge_dir', type=str, default='in', choices=['in', 'out'])
-    parser.add_argument('--arw_position', type=boolean_string, default='true')
+    parser.add_argument('--arw_position', type=boolean_string, default='false')
     parser.add_argument('--cls_or_anchor', type=str, default='cls', choices=["cls", "anchor"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--fix_pred_lr', type=boolean_string, default='false')
@@ -109,11 +109,11 @@ def default_parser():
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
     parser.add_argument('--stanford', type=boolean_string, default='true')
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--gnn_hop_num', type=int, default=3)
-    parser.add_argument('--alpha', type=float, default=0.1)
-    parser.add_argument('--hidden_dim', type=int, default=128)
+    parser.add_argument('--gnn_hop_num', type=int, default=5)
+    parser.add_argument('--alpha', type=float, default=0.15)
+    parser.add_argument('--hidden_dim', type=int, default=256)
     parser.add_argument('--head_num', type=int, default=8)
-    parser.add_argument('--layers', type=int, default=6)
+    parser.add_argument('--layers', type=int, default=2)
     parser.add_argument('--negative_slope', type=float, default=0.2)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
@@ -128,7 +128,7 @@ def default_parser():
     parser.add_argument('--seed', type=int, default=45, help="random seed for initialization")
     parser.add_argument("--num_pretrain_epochs", default=150.0, type=float,
                         help="Total number of pre-training epochs to perform.")
-    parser.add_argument("--num_train_epochs", default=100.0, type=float,
+    parser.add_argument("--num_train_epochs", default=150.0, type=float,
                         help="Total number of training epochs to perform.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
