@@ -102,8 +102,8 @@ def default_parser():
     parser.add_argument('--arw_pos_emb_dim', type=int, default=300)
     parser.add_argument('--siam_dim', type=int, default=2048)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--feat_drop', type=float, default=0.5)
-    parser.add_argument('--attn_drop', type=float, default=0.5)
+    parser.add_argument('--feat_drop', type=float, default=0.2)
+    parser.add_argument('--attn_drop', type=float, default=0.25)
     parser.add_argument('--residual', type=boolean_string, default='true')
     parser.add_argument('--diff_head_tail', type=boolean_string, default='true')
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
@@ -111,10 +111,10 @@ def default_parser():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--gnn_hop_num', type=int, default=5)
     parser.add_argument('--alpha', type=float, default=0.2)
-    parser.add_argument('--hidden_dim', type=int, default=512)
+    parser.add_argument('--hidden_dim', type=int, default=128)
     parser.add_argument('--head_num', type=int, default=8)
     parser.add_argument('--layers', type=int, default=6)
-    parser.add_argument('--negative_slope', type=float, default=0.4)
+    parser.add_argument('--negative_slope', type=float, default=0.2)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
     parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)

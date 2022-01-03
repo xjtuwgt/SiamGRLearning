@@ -1,38 +1,12 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from dgl.nn.pytorch.utils import Identity
 import dgl.function as fn
 from torch import Tensor
 from dgl.nn.functional import edge_softmax
 from torch.nn import LayerNorm as layer_norm
 from dgl.base import DGLError
-
-
-class PositionwiseFeedForward(nn.Module):
-    "Implements FFN equation."
-    def __init__(self, model_dim, d_hidden, dropout=0.1):
-        super(PositionwiseFeedForward, self).__init__()
-        self.model_dim = model_dim
-        self.hidden_dim = d_hidden
-        self.w_1 = nn.Linear(model_dim, d_hidden)
-        self.w_2 = nn.Linear(d_hidden, model_dim)
-        self.dropout = nn.Dropout(dropout)
-        self.init()
-
-    def forward(self, x):
-        return self.w_2(self.dropout(F.relu(self.w_1(x))))
-
-    def init(self):
-        # gain = nn.init.calculate_gain('relu')
-        gain = small_init_gain(d_in=self.model_dim, d_out=self.hidden_dim)
-        nn.init.xavier_normal_(self.w_1.weight, gain=gain)
-        gain = small_init_gain(d_in=self.hidden_dim, d_out=self.model_dim)
-        nn.init.xavier_normal_(self.w_2.weight, gain=gain)
-
-
-def small_init_gain(d_in, d_out):
-    return 2.0 / (d_in + 4.0 * d_out)
+from core.gnn_utils import PositionwiseFeedForward, small_init_gain
 
 
 class RGDTLayer(nn.Module):
@@ -45,7 +19,7 @@ class RGDTLayer(nn.Module):
                  alpha: float = 0.15,
                  feat_drop: float = 0.1,
                  attn_drop: float = 0.1,
-                 negative_slope=0.2,
+                 negative_slope: float = 0.2,
                  residual=True,
                  activation=None,
                  diff_head_tail=False,
@@ -174,17 +148,18 @@ class RGDTLayer(nn.Module):
                 return rst
 
     def ppr_estimation(self, graph):
-        graph = graph.local_var()
-        feat_0 = graph.srcdata.pop('ft')
-        feat = feat_0
-        attentions = graph.edata.pop('a')
-        for _ in range(self._hop_num):
-            graph.srcdata['h'] = self.feat_drop(feat)
-            graph.edata['a_temp'] = self.attn_drop(attentions)
-            graph.update_all(fn.u_mul_e('h', 'a_temp', 'm'), fn.sum('m', 'h'))
-            feat = graph.dstdata.pop('h')
-            feat = (1.0 - self._alpha) * self.feat_drop(feat) + self._alpha * feat_0
-        return feat
+        with graph.local_scope():
+            graph = graph.local_var()
+            feat_0 = graph.srcdata.pop('ft')
+            feat = feat_0
+            attentions = graph.edata.pop('a')
+            for _ in range(self._hop_num):
+                graph.srcdata['h'] = self.feat_drop(feat)
+                graph.edata['a_temp'] = self.attn_drop(attentions)
+                graph.update_all(fn.u_mul_e('h', 'a_temp', 'm'), fn.sum('m', 'h'))
+                feat = graph.dstdata.pop('h')
+                feat = (1.0 - self._alpha) * self.feat_drop(feat) + self._alpha * feat_0
+            return feat
 
 
 class GDTLayer(nn.Module):
@@ -196,7 +171,7 @@ class GDTLayer(nn.Module):
                  alpha: float = 0.15,
                  feat_drop: float = 0.1,
                  attn_drop: float = 0.1,
-                 negative_slope=0.2,
+                 negative_slope: float = 0.2,
                  residual=True,
                  activation=None,
                  diff_head_tail=False,
@@ -280,6 +255,7 @@ class GDTLayer(nn.Module):
                 feat_tail = self._ent_fc_tail(ent_tail).view(-1, self._num_heads, self._head_dim)
             else:
                 feat_head = feat_tail = self._ent_fc(ent_head).view(-1, self._num_heads, self._head_dim)
+            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             eh = (feat_head * self.attn_h).sum(dim=-1).unsqueeze(-1)
             et = (feat_tail * self.attn_t).sum(dim=-1).unsqueeze(-1)
             # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
