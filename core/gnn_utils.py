@@ -100,8 +100,8 @@ def top_p_attention(graph: DGLHeteroGraph, attn_scores: Tensor, p: float = 0.75)
         return attn_mask, top_k_attn_sum
 
 
-def top_kp_attention(graph: DGLHeteroGraph, attn_scores: Tensor, k: int = 5, p: float = 0.75, top_mode='top_k'):
-    if top_mode == 'top_k':
+def top_kp_attention(graph: DGLHeteroGraph, attn_scores: Tensor, k: int = 5, p: float = 0.75, sparse_mode='top_k'):
+    if sparse_mode == 'top_k':
         assert k >= 2
         attn_mask, top_k_attn_sum = top_k_attention(graph=graph, attn_scores=attn_scores, k=k)
     else:
