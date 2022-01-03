@@ -1,4 +1,5 @@
-from core.gnn_layers import GDTLayer, RGDTLayer
+# from core.gnn_layers import GDTLayer, RGDTLayer
+from core.gnn_layers_v2 import GDTLayer, RGDTLayer
 from torch import Tensor
 from core.siamese_network import SimSiam
 from core.layers import EmbeddingLayer
