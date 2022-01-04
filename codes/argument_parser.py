@@ -87,9 +87,10 @@ def default_parser():
     parser.add_argument('--ogb_node_name', type=str, default='ogbn-arxiv')
     parser.add_argument('--graph_type', type=str, default='citation', choices=["citation", "ogb", "kg"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--sub_graph_fanouts', type=str, default='10,5,5')
+    parser.add_argument('--sub_graph_fanouts', type=str, default='10,5')
     parser.add_argument('--sub_graph_hop_num', type=int, default=6)
     parser.add_argument('--sub_graph_edge_dir', type=str, default='in', choices=['in', 'out'])
+    parser.add_argument('--sub_graph_self_loop', type=boolean_string, default='true')
     parser.add_argument('--arw_position', type=boolean_string, default='false')
     parser.add_argument('--cls_or_anchor', type=str, default='cls', choices=["cls", "anchor"])
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -102,8 +103,8 @@ def default_parser():
     parser.add_argument('--arw_pos_emb_dim', type=int, default=300)
     parser.add_argument('--siam_dim', type=int, default=2048)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    parser.add_argument('--feat_drop', type=float, default=0.2)
-    parser.add_argument('--attn_drop', type=float, default=0.25)
+    parser.add_argument('--feat_drop', type=float, default=0.25)
+    parser.add_argument('--attn_drop', type=float, default=0.2)
     parser.add_argument('--residual', type=boolean_string, default='true')
     parser.add_argument('--diff_head_tail', type=boolean_string, default='true')
     parser.add_argument('--ppr_diff', type=boolean_string, default='true')
@@ -114,7 +115,7 @@ def default_parser():
     parser.add_argument('--hidden_dim', type=int, default=128)
     parser.add_argument('--head_num', type=int, default=8)
     parser.add_argument('--layers', type=int, default=6)
-    parser.add_argument('--negative_slope', type=float, default=0.2)
+    parser.add_argument('--negative_slope', type=float, default=0.3)
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     parser.add_argument('--eval_batch_size', type=int, default=32)
     parser.add_argument('--per_gpu_pretrain_batch_size', type=int, default=16)

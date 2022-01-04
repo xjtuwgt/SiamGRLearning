@@ -198,10 +198,12 @@ def add_self_loop_in_graph(graph, self_loop_r: int):
     :param self_loop_r:
     :return:
     """
-    number_of_nodes = graph.number_of_nodes()
+    g = copy.deepcopy(graph)
+    number_of_nodes = g.number_of_nodes()
     self_loop_r_array = torch.full((number_of_nodes,), self_loop_r, dtype=torch.long)
     node_ids = torch.arange(number_of_nodes)
-    graph.add_edges(node_ids, node_ids, {'rid': self_loop_r_array})
+    g.add_edges(node_ids, node_ids, {'rid': self_loop_r_array})
+    return g
 
 
 def sub_graph_cls_addition(subgraph, cls_parent_node_id: int, special_relation_dict: dict):
@@ -257,7 +259,7 @@ def cls_sub_graph_extractor(graph, edge_dict: dict, neighbors_dict: dict, specia
     subgraph.ndata['n_rw_label'] = node_orders
     end_time = time() if debug else 0
     if self_loop:
-        add_self_loop_in_graph(graph=graph, self_loop_r=special_relation_dict['loop_r'])
+        subgraph = add_self_loop_in_graph(graph=subgraph, self_loop_r=special_relation_dict['loop_r'])
     if debug:
         print('CLS sub-graph construction time = {:.4f} seconds'.format(end_time - start_time))
     return subgraph, parent2sub_dict

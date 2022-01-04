@@ -1,5 +1,5 @@
-# from core.gnn_layers import GDTLayer, RGDTLayer
-from core.gnn_layers_v2 import GDTLayer, RGDTLayer
+from core.gnn_layers import GDTLayer, RGDTLayer
+# from core.gnn_layers_v2 import GDTLayer, RGDTLayer
 from torch import Tensor
 from core.siamese_network import SimSiam
 from core.layers import EmbeddingLayer
@@ -36,7 +36,7 @@ class GDTEncoder(nn.Module):
                                                    residual=self.config.residual,
                                                    diff_head_tail=self.config.diff_head_tail,
                                                    ppr_diff=self.config.ppr_diff))
-        for _ in range(self.config.layers):
+        for _ in range(1, self.config.layers):
             self.graph_encoder.append(module=GDTLayer(in_ent_feats=self.config.hidden_dim,
                                                       out_ent_feats=self.config.hidden_dim,
                                                       num_heads=self.config.head_num,

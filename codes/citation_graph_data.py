@@ -97,6 +97,7 @@ def citation_node_pred_subgraph_data_helper(args):
                                               special_entity_dict=special_entity_dict,
                                               special_relation_dict=special_relation_dict,
                                               num_class=n_classes,
+                                              self_loop=args.sub_graph_self_loop,
                                               train_batch_size=args.train_batch_size, node_split_idx=None,
                                               val_batch_size=args.eval_batch_size, graph_type=args.graph_type)
     return data_helper
