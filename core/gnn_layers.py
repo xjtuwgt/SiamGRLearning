@@ -131,8 +131,9 @@ class RGDTLayer(nn.Module):
                 rst = graph.dstdata['ft']
             # residual
             if self.res_fc_ent is not None:
-                resval = self.res_fc_ent(ent_tail).view(ent_tail.shape[0], -1, self._head_dim)
-                rst = self.feat_drop(rst) + resval  # residual
+                resval = self.res_fc_ent(ent_feat).view(ent_feat.shape[0], -1, self._head_dim)
+                rst = self.feat_drop(rst) + resval
+
             rst = rst.flatten(1)
             # +++++++++++++++++++++++++++++++++++++++
             ff_rst = self.feed_forward_layer(self.feat_drop(self.ff_layer_norm(rst)))
@@ -151,7 +152,7 @@ class RGDTLayer(nn.Module):
         with graph.local_scope():
             graph = graph.local_var()
             feat_0 = graph.srcdata.pop('ft')
-            feat = feat_0
+            feat = feat_0.clone()
             attentions = graph.edata.pop('a')
             for _ in range(self._hop_num):
                 graph.srcdata['h'] = feat
@@ -273,11 +274,9 @@ class GDTLayer(nn.Module):
                 rst = graph.dstdata['ft']
             # residual
             if self.res_fc_ent is not None:
-                if not isinstance(self.res_fc_ent, Identity):
-                    resval = self.res_fc_ent(self.feat_drop(ent_feat)).view(ent_feat.shape[0], -1, self._head_dim)
-                else:
-                    resval = self.res_fc_ent(ent_feat).view(ent_feat.shape[0], -1, self._head_dim)
-                rst = self.feat_drop(rst) + resval  # residual
+                resval = self.res_fc_ent(ent_feat).view(ent_feat.shape[0], -1, self._head_dim)
+                rst = self.feat_drop(rst) + resval
+
             rst = rst.flatten(1)
             # +++++++++++++++++++++++++++++++++++++++
             ff_rst = self.feed_forward_layer(self.feat_drop(self.ff_layer_norm(rst)))
@@ -296,7 +295,7 @@ class GDTLayer(nn.Module):
         with graph.local_scope():
             graph = graph.local_var()
             feat_0 = graph.srcdata.pop('ft')
-            feat = feat_0
+            feat = feat_0.clone()
             attentions = graph.edata.pop('a')
             for _ in range(self._hop_num):
                 graph.srcdata['h'] = self.feat_drop(feat)
