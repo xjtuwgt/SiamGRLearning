@@ -154,11 +154,11 @@ class RGDTLayer(nn.Module):
             feat = feat_0
             attentions = graph.edata.pop('a')
             for _ in range(self._hop_num):
-                graph.srcdata['h'] = self.feat_drop(feat)
+                graph.srcdata['h'] = feat
                 graph.edata['a_temp'] = self.attn_drop(attentions)
                 graph.update_all(fn.u_mul_e('h', 'a_temp', 'm'), fn.sum('m', 'h'))
                 feat = graph.dstdata.pop('h')
-                feat = (1.0 - self._alpha) * self.feat_drop(feat) + self._alpha * feat_0
+                feat = (1.0 - self._alpha) * feat + self._alpha * feat_0
             return feat
 
 
@@ -273,7 +273,10 @@ class GDTLayer(nn.Module):
                 rst = graph.dstdata['ft']
             # residual
             if self.res_fc_ent is not None:
-                resval = self.res_fc_ent(ent_tail).view(ent_tail.shape[0], -1, self._head_dim)
+                if not isinstance(self.res_fc_ent, Identity):
+                    resval = self.res_fc_ent(self.feat_drop(ent_feat)).view(ent_feat.shape[0], -1, self._head_dim)
+                else:
+                    resval = self.res_fc_ent(ent_feat).view(ent_feat.shape[0], -1, self._head_dim)
                 rst = self.feat_drop(rst) + resval  # residual
             rst = rst.flatten(1)
             # +++++++++++++++++++++++++++++++++++++++
