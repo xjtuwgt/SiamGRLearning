@@ -89,3 +89,5 @@ def evaluate_node_classification_model(model, node_data_helper, args, data_type=
             total_correct = total_correct + (preds == batch['batch_label']).sum().data.item()
     eval_acc = total_correct/total_example
     return eval_acc
+
+
