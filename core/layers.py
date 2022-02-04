@@ -1,7 +1,6 @@
 import torch
 from torch import Tensor, LongTensor
 from torch import nn
-import torch.nn.init as INIT
 from dgl.nn.pytorch.utils import Identity
 
 
@@ -25,12 +24,12 @@ class EmbeddingLayer(nn.Module):
         Parameters
         ----------
         emb_init : float
-            The intial embedding range should be [-emb_init, emb_init].
+            The initial embedding range should be [-emb_init, emb_init].
         """
-        INIT.xavier_normal_(self.embedding.weight, emb_init)
-        gain = INIT.calculate_gain('relu')
+        nn.init.xavier_normal_(self.embedding.weight, emb_init)
+        gain = nn.init.calculate_gain('relu')
         if isinstance(self.projection, nn.Linear):
-            INIT.xavier_normal_(self.projection.weight, gain=gain)
+            nn.init.xavier_normal_(self.projection.weight, gain=gain)
 
     def _embed(self, embeddings):
         embeddings = self.projection(embeddings)

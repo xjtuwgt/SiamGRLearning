@@ -6,7 +6,6 @@ from torch import Tensor
 from dgl.nn.functional import edge_softmax
 from torch.nn import LayerNorm as layer_norm
 from dgl.base import DGLError
-import math
 from core.gnn_utils import PositionwiseFeedForward, small_init_gain
 
 
